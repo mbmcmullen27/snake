@@ -1,6 +1,8 @@
 #ifndef snake_h
 #define snake_h
 
+#include "position.h"
+
 typedef struct {
     Position* head;
     Position* tail;
@@ -8,8 +10,7 @@ typedef struct {
 } Snake;
 
 void initSnake();
-void moveHead();
-void moveTail();
-
+void moveHead(Position* head);
+void moveTail(Position* tail);
 
 #endif
