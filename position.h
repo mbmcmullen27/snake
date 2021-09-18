@@ -11,12 +11,6 @@ typedef struct {
     int prev;
 } Position;
 
-Position* corners[8];
-
-void initPosition(Position*);
-void advancePosition(Position*);
-void addCorner(Position*);
-Position* popCorner();
-Position* initCorner(int x, int y, int dir);
+Position* initPosition();
 
 #endif

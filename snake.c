@@ -33,24 +33,13 @@ int main() {
 }
 
 void initSnake(){
-    Position* head = malloc(sizeof (Position));
-    Position* tail = malloc(sizeof (Position));
-
-    initPosition(head);
-    initPosition(tail);
-    
+    Position* head = initPosition();
+    Position* tail = initPosition();
+        
     snake.head = head;
     snake.tail = tail;
-
-    snake.direction = head->dir; 
 }
 
-void initPosition(Position* pos) {
-    pos->x=0;
-    pos->y=0;
-    pos->dir=KEY_RIGHT;
-    pos->prev=KEY_RIGHT;
-}
 
 void moveHead(Position* head) {
     switch(head->dir) {
