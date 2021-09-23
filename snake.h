@@ -3,7 +3,9 @@
 
 #include "position.h"
 
-Position* corners[8];
+Position** corners;
+int top;
+int length;
 
 typedef struct {
     Position* head;
@@ -13,8 +15,10 @@ typedef struct {
 void initSnake();
 void moveHead(Position* head);
 void moveTail(Position* tail);
-void addCorner(Position*);
+void addCorner(Position* next);
+void expandCorners();
 Position* popCorner();
+void pushCorner();
 Position* initCorner(int x, int y, int dir);
 
 Position* initPosition() {

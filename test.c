@@ -15,9 +15,7 @@ int main(){
         printf("[%i] - x:%i y:%i d:%i\n", i, list[i]->x, list[i]->y, list[i]->dir);
     }
 
-
     list = realloc(list, 20);
-
 
     for(i=8;i<20;i++){
         list[i] = initPosition(); 
