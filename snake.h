@@ -5,6 +5,7 @@
 
 Position** corners;
 int top;
+int bottom;
 int length;
 
 typedef struct {

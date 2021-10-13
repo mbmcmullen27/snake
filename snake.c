@@ -7,7 +7,6 @@
 Snake snake;
 
 int main() {
-
     initscr();
     curs_set(0);
     refresh();
@@ -23,27 +22,32 @@ int main() {
 
     for(;;) {
         moveHead(snake.head);
-        moveTail(snake.tail);
+        if(top>1) moveTail(snake.tail);
+
         refresh();
-        usleep(50000);
+        usleep(250000); // 50000
         mvprintw(my-1,0,"corners: %i length: %i",top, length);
-        if(top>0) mvprintw(my,0,"top: (%i, %i)", corners[top-1]->x, corners[top-1]->y);
+        if(top>1) mvprintw(my,0,"top: (%i, %i) bottom: (%i, %i) tail: (%i, %i)    ", 
+            corners[top-1]->x, corners[top-1]->y,
+            corners[bottom]->x, corners[bottom]->y,
+            snake.tail->x, snake.tail->y);
         int key = getch();
         if (key != ERR) snake.head->dir = key;
     }
-
 }
 
 void initSnake(){
     length=4;
     corners = malloc(sizeof(Position*)*length);
     top=0;
+    bottom=0;
 
     Position* head = initPosition();
     Position* tail = initPosition();
-        
+
     snake.head = head;
     snake.tail = tail;
+    pushCorner();
 }
 
 Position* initCorner(int x, int y, int dir) {
@@ -55,7 +59,7 @@ Position* initCorner(int x, int y, int dir) {
 }
 
 void expandCorners(){
-    mvprintw(my,mx/2,"Expanding at %i", top);
+    mvprintw(my-2,0,"Expanded at %i", top);
     length*=2;
     Position** temp = realloc(corners, length*sizeof(Position*));   
     corners = temp;
@@ -149,5 +153,26 @@ void moveHead(Position* head) {
 }
 
 void moveTail(Position* tail) {
-
+    
+    mvaddch(tail->y, tail->x, ' ');
+    if(tail->x == corners[bottom]->x && tail->y == corners[bottom]->y) {
+        tail->dir = corners[bottom]->dir;
+        bottom++;
+    }           
+    
+    switch(tail->dir) {
+        case KEY_RIGHT:
+            tail->x++;
+            break;
+        case KEY_UP:
+            tail->y--;
+            break;
+        case KEY_LEFT:
+            tail->x--;
+            break;
+        case KEY_DOWN:
+            tail->y++;
+            break;
+    }
+       
 }
