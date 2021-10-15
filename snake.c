@@ -36,7 +36,7 @@ int main() {
     }
 }
 
-void initSnake(){
+void initSnake() {
     length=4;
     corners = malloc(sizeof(Position*)*length);
     top=0;
@@ -58,14 +58,14 @@ Position* initCorner(int x, int y, int dir) {
     return res;
 }
 
-void expandCorners(){
+void expandCorners() {
     mvprintw(my-2,0,"Expanded at %i", top);
     length*=2;
     Position** temp = realloc(corners, length*sizeof(Position*));   
     corners = temp;
 }
 
-void pushCorner(){
+void pushCorner() {
     if(top==length-1) expandCorners();
     
     Position* pos = snake.head;
@@ -155,11 +155,15 @@ void moveHead(Position* head) {
 void moveTail(Position* tail) {
     
     mvaddch(tail->y, tail->x, ' ');
-    if(tail->x == corners[bottom]->x && tail->y == corners[bottom]->y) {
+    if (tail->x == corners[bottom]->x && tail->y == corners[bottom]->y) {
         tail->dir = corners[bottom]->dir;
+        if(bottom < top - 1) bottom++;
+    } else if (tail->x == corners[top-1]->x && tail->y == corners[top-1]->y) {
+        tail->dir = corners[top-1]->dir;
         bottom++;
-    }           
-    
+
+    }
+
     switch(tail->dir) {
         case KEY_RIGHT:
             tail->x++;
