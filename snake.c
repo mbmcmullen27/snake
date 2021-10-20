@@ -26,7 +26,7 @@ int main() {
 
         refresh();
         usleep(250000); // 50000
-        mvprintw(my-1,0,"corners: %i length: %i",top, length);
+        mvprintw(my-1,0,"corners: %i length: %i bottom: %i",top, length, bottom);
         if(top>1) mvprintw(my,0,"top: (%i, %i) bottom: (%i, %i) tail: (%i, %i)    ", 
             corners[top-1]->x, corners[top-1]->y,
             corners[bottom]->x, corners[bottom]->y,
@@ -55,6 +55,7 @@ Position* initCorner(int x, int y, int dir) {
     res->x=x;
     res->y=y;
     res->dir=dir;
+    res->visited=false;
     return res;
 }
 
@@ -70,6 +71,7 @@ void pushCorner() {
     
     Position* pos = snake.head;
     corners[top] = initCorner(pos->x,pos->y,pos->dir);
+    if(top-1 == bottom && corners[bottom]->visited) bottom++;
     top++;
 }
 
@@ -155,13 +157,17 @@ void moveHead(Position* head) {
 void moveTail(Position* tail) {
     
     mvaddch(tail->y, tail->x, ' ');
-    if (tail->x == corners[bottom]->x && tail->y == corners[bottom]->y) {
+    
+    if (bottom < length && tail->x == corners[bottom]->x && tail->y == corners[bottom]->y) {
         tail->dir = corners[bottom]->dir;
-        if(bottom < top - 1) bottom++;
+        corners[bottom]->visited=true;
+        if(bottom<top-1){
+            bottom++;
+        }
     } else if (tail->x == corners[top-1]->x && tail->y == corners[top-1]->y) {
         tail->dir = corners[top-1]->dir;
+        corners[bottom]->visited=true;
         bottom++;
-
     }
 
     switch(tail->dir) {
