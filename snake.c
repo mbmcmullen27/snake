@@ -71,14 +71,14 @@ void pushCorner() {
     
     Position* pos = snake.head;
     corners[top] = initCorner(pos->x,pos->y,pos->dir);
-    if(top-1 == bottom && corners[bottom]->visited) bottom++;
+    if(corners[bottom]->visited) bottom++;
     top++;
 }
 
 void moveHead(Position* head) {
     switch(head->dir) {
         case KEY_RIGHT: // east
-            if(head->x < mx) {
+            if(head->x < mx && head->prev != KEY_LEFT) {
                 if (head->prev == KEY_UP) {
                     mvaddch(head->y, head->x, A_ALTCHARSET | ACS_ULCORNER);
                     pushCorner();
@@ -91,12 +91,14 @@ void moveHead(Position* head) {
                 mvaddch(head->y, head->x+1,'>');
                 head->x++;
                 head->prev = KEY_RIGHT;
-            } else {
-                // out of bounds
+            } else if (head->prev == KEY_LEFT){
+                mvaddch(head->y, head->x,'-');    
+                mvaddch(head->y,head->x-1,'<');
+                head->x--;
             }
             break;
         case KEY_UP: // north
-            if(head->y > 0) {
+            if(head->y > 0 && head->prev != KEY_DOWN) {
                 if (head->prev == KEY_LEFT) {
                     mvaddch(head->y, head->x,A_ALTCHARSET | ACS_LLCORNER);
                     pushCorner();
@@ -109,12 +111,14 @@ void moveHead(Position* head) {
                 mvaddch(head->y-1, head->x, '^');
                 head->y--;
                 head->prev = KEY_UP;
-            } else {
-                // out of bounds
+            } else if(head->prev == KEY_DOWN) {
+                mvaddch(head->y, head->x, '|');
+                mvaddch(head->y+1,head->x,'v');
+                head->y++;
             }
             break;
         case KEY_LEFT: // west
-            if(head->x > 0) {
+            if(head->x > 0 && head->prev != KEY_RIGHT) {
                 if (head->prev == KEY_UP) {
                     mvaddch(head->y, head->x,A_ALTCHARSET | ACS_URCORNER);
                     pushCorner();
@@ -127,12 +131,14 @@ void moveHead(Position* head) {
                 mvaddch(head->y,head->x-1,'<');
                 head->x--;
                 head->prev = KEY_LEFT;
-            } else {
-                // out of bounds
+            } else if(head->prev == KEY_RIGHT){
+                mvaddch(head->y, head->x,'-');    
+                mvaddch(head->y, head->x+1,'>');
+                head->x++;
             }
             break;
         case KEY_DOWN: // south
-            if(head->y < my) {
+            if(head->y < my && head->prev != KEY_UP) {
                 if (head->prev == KEY_LEFT) {
                     mvaddch(head->y, head->x,A_ALTCHARSET | ACS_ULCORNER);
                     pushCorner();
@@ -145,8 +151,10 @@ void moveHead(Position* head) {
                 mvaddch(head->y+1,head->x,'v');
                 head->y++;
                 head->prev = KEY_DOWN;
-            } else {
-                // out of bounds
+            } else if (head->prev == KEY_UP){
+                mvaddch(head->y, head->x, '|');
+                mvaddch(head->y-1, head->x, '^');
+                head->y--;
             }
             break;
         default:

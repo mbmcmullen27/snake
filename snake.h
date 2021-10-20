@@ -28,6 +28,7 @@ Position* initPosition() {
     res->y=0;
     res->dir=KEY_RIGHT;
     res->prev=KEY_RIGHT;
+    res->visited=false;
     return res;
 }
 
