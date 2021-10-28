@@ -22,7 +22,7 @@ int main() {
 
     for(;;) {
         moveHead(snake.head);
-        moveTail(snake.tail);
+        if(top>1) moveTail(snake.tail);
 
         refresh();
         usleep(250000); // 50000
