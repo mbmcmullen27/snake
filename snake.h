@@ -18,6 +18,7 @@ void moveHead(Position* head);
 void moveTail(Position* tail);
 void addCorner(Position* next);
 void expandCorners();
+void freeCorners(int len);
 Position* popCorner();
 void pushCorner();
 Position* initCorner(int x, int y, int dir);

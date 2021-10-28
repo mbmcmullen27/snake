@@ -22,7 +22,7 @@ int main() {
 
     for(;;) {
         moveHead(snake.head);
-        if(top>1) moveTail(snake.tail);
+        moveTail(snake.tail);
 
         refresh();
         usleep(250000); // 50000
@@ -33,7 +33,31 @@ int main() {
             snake.tail->x, snake.tail->y);
         int key = getch();
         if (key != ERR) snake.head->dir = key;
+        if (bottom == length/2) freeCorners(bottom);
     }
+
+}
+
+void freeCorners(int len) {
+    mvprintw(my-2,0,"Reduced at %i     ", top-1);
+
+    int i;
+    Position** res = malloc(sizeof(Position*)*(length-len));
+
+    for(i = 0; i < len; i++) {
+        free(corners[i]);
+    }
+
+    for(i = 0;i+len<length; i++) {
+        mvprintw(my-2,mx/2,"index: %i     ", i);
+        res[i] = corners[i+len];
+    }
+
+    free(corners);
+    corners = res;
+    length = length - len;
+    top = top - len;
+    bottom = bottom - len;
 }
 
 void initSnake() {
@@ -180,16 +204,16 @@ void moveTail(Position* tail) {
 
     switch(tail->dir) {
         case KEY_RIGHT:
-            tail->x++;
+            if(snake.head->x < mx) tail->x++;
             break;
         case KEY_UP:
-            tail->y--;
+            if(snake.head->y > 0) tail->y--;
             break;
         case KEY_LEFT:
-            tail->x--;
+            if(snake.head->x > 0) tail->x--;
             break;
         case KEY_DOWN:
-            tail->y++;
+            if(snake.head->y < my) tail->y++;
             break;
     }
        
