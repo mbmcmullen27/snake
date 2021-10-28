@@ -5,6 +5,8 @@
 #include "snake.h"
 
 Snake snake;
+int ticks;
+int lastHit;
 
 int main() {
     initscr();
@@ -19,14 +21,16 @@ int main() {
     noecho();
 
     initSnake();
+    lastHit = 0;
 
-    for(;;) {
+    for(ticks = 0;;ticks++) {
         moveHead(snake.head);
-        if(top>1) moveTail(snake.tail);
+
+        mvaddch(my/2,mx/2,'*');
 
         refresh();
         usleep(250000); // 50000
-        mvprintw(my-1,0,"corners: %i length: %i bottom: %i",top, length, bottom);
+        mvprintw(my-1,0,"corners: %i length: %i bottom: %i    ",top, length, bottom);
         if(top>1) mvprintw(my,0,"top: (%i, %i) bottom: (%i, %i) tail: (%i, %i)    ", 
             corners[top-1]->x, corners[top-1]->y,
             corners[bottom]->x, corners[bottom]->y,
@@ -112,6 +116,7 @@ void moveHead(Position* head) {
                 } else {
                     mvaddch(head->y, head->x,'-');    
                 }
+                if ((mvinch(head->y, head->x+1) & A_CHARTEXT) == '*') lastHit = ticks;
                 mvaddch(head->y, head->x+1,'>');
                 head->x++;
                 head->prev = KEY_RIGHT;
@@ -119,6 +124,8 @@ void moveHead(Position* head) {
                 mvaddch(head->y, head->x,'-');    
                 mvaddch(head->y,head->x-1,'<');
                 head->x--;
+            } else {
+                // out of bounds
             }
             break;
         case KEY_UP: // north
@@ -132,6 +139,7 @@ void moveHead(Position* head) {
                 } else {
                     mvaddch(head->y, head->x, '|');
                 }
+                if ((mvinch(head->y-1, head->x) & A_CHARTEXT) == '*') lastHit = ticks;
                 mvaddch(head->y-1, head->x, '^');
                 head->y--;
                 head->prev = KEY_UP;
@@ -139,6 +147,8 @@ void moveHead(Position* head) {
                 mvaddch(head->y, head->x, '|');
                 mvaddch(head->y+1,head->x,'v');
                 head->y++;
+            } else {
+                // out of bounds
             }
             break;
         case KEY_LEFT: // west
@@ -152,6 +162,7 @@ void moveHead(Position* head) {
                 } else {
                     mvaddch(head->y, head->x, '-');
                 }
+                if ((mvinch(head->y, head->x-1) & A_CHARTEXT) == '*') lastHit = ticks;
                 mvaddch(head->y,head->x-1,'<');
                 head->x--;
                 head->prev = KEY_LEFT;
@@ -159,6 +170,8 @@ void moveHead(Position* head) {
                 mvaddch(head->y, head->x,'-');    
                 mvaddch(head->y, head->x+1,'>');
                 head->x++;
+            } else {
+                // out of bounds
             }
             break;
         case KEY_DOWN: // south
@@ -172,6 +185,7 @@ void moveHead(Position* head) {
                 } else {
                     mvaddch(head->y, head->x, '|');
                 }
+                if ((mvinch(head->y+1, head->x) & A_CHARTEXT) == '*') lastHit = ticks;
                 mvaddch(head->y+1,head->x,'v');
                 head->y++;
                 head->prev = KEY_DOWN;
@@ -179,11 +193,16 @@ void moveHead(Position* head) {
                 mvaddch(head->y, head->x, '|');
                 mvaddch(head->y-1, head->x, '^');
                 head->y--;
+            } else {
+                // out of bounds
             }
             break;
         default:
             break;
     }
+
+    // if ((mvinch(head->y, head->x) & A_CHARTEXT) == '*') lastHit = ticks;
+    if(ticks>5 && (ticks > lastHit+3)) moveTail(snake.tail);
 }
 
 void moveTail(Position* tail) {
