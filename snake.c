@@ -1,6 +1,7 @@
 #include <curses.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include "snake.h"
 
@@ -22,14 +23,16 @@ int main() {
 
     initSnake();
     lastHit = 0;
+    srand(time(NULL));
+
+    mvaddch(my/2,mx/2,'*');
 
     for(ticks = 0;;ticks++) {
         moveHead(snake.head);
 
-        mvaddch(my/2,mx/2,'*');
 
         refresh();
-        usleep(250000); // 50000
+        usleep(150000); // 50000
         mvprintw(my-1,0,"corners: %i length: %i bottom: %i    ",top, length, bottom);
         if(top>1) mvprintw(my,0,"top: (%i, %i) bottom: (%i, %i) tail: (%i, %i)    ", 
             corners[top-1]->x, corners[top-1]->y,
@@ -73,6 +76,9 @@ void initSnake() {
     Position* head = initPosition();
     Position* tail = initPosition();
 
+    head->y = my/2;
+    tail->y = my/2;
+
     snake.head = head;
     snake.tail = tail;
     pushCorner();
@@ -103,6 +109,18 @@ void pushCorner() {
     top++;
 }
 
+void collect() {
+    lastHit = ticks;
+    int x, y;
+    char character;
+    do {
+        x = rand() % mx;
+        y = rand() % (my-4);
+        character = mvinch(y,x) & A_CHARTEXT;
+    } while (character != ' ');
+    mvaddch(y,x, '*');
+}
+
 void moveHead(Position* head) {
     switch(head->dir) {
         case KEY_RIGHT: // east
@@ -116,7 +134,7 @@ void moveHead(Position* head) {
                 } else {
                     mvaddch(head->y, head->x,'-');    
                 }
-                if ((mvinch(head->y, head->x+1) & A_CHARTEXT) == '*') lastHit = ticks;
+                if ((mvinch(head->y, head->x+1) & A_CHARTEXT) == '*') collect();
                 mvaddch(head->y, head->x+1,'>');
                 head->x++;
                 head->prev = KEY_RIGHT;
@@ -139,7 +157,7 @@ void moveHead(Position* head) {
                 } else {
                     mvaddch(head->y, head->x, '|');
                 }
-                if ((mvinch(head->y-1, head->x) & A_CHARTEXT) == '*') lastHit = ticks;
+                if ((mvinch(head->y-1, head->x) & A_CHARTEXT) == '*') collect();
                 mvaddch(head->y-1, head->x, '^');
                 head->y--;
                 head->prev = KEY_UP;
@@ -162,7 +180,7 @@ void moveHead(Position* head) {
                 } else {
                     mvaddch(head->y, head->x, '-');
                 }
-                if ((mvinch(head->y, head->x-1) & A_CHARTEXT) == '*') lastHit = ticks;
+                if ((mvinch(head->y, head->x-1) & A_CHARTEXT) == '*') collect();
                 mvaddch(head->y,head->x-1,'<');
                 head->x--;
                 head->prev = KEY_LEFT;
@@ -185,7 +203,7 @@ void moveHead(Position* head) {
                 } else {
                     mvaddch(head->y, head->x, '|');
                 }
-                if ((mvinch(head->y+1, head->x) & A_CHARTEXT) == '*') lastHit = ticks;
+                if ((mvinch(head->y+1, head->x) & A_CHARTEXT) == '*') collect();
                 mvaddch(head->y+1,head->x,'v');
                 head->y++;
                 head->prev = KEY_DOWN;
@@ -201,7 +219,6 @@ void moveHead(Position* head) {
             break;
     }
 
-    // if ((mvinch(head->y, head->x) & A_CHARTEXT) == '*') lastHit = ticks;
     if(ticks>5 && (ticks > lastHit+3)) moveTail(snake.tail);
 }
 
