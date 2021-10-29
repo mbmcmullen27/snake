@@ -14,6 +14,8 @@ typedef struct {
 } Snake;
 
 void initSnake();
+void startGame();
+void gameOver();
 void moveHead(Position* head);
 void moveTail(Position* tail);
 void addCorner(Position* next);
@@ -25,8 +27,8 @@ Position* initCorner(int x, int y, int dir);
 
 Position* initPosition() {
     Position* res = malloc(sizeof(Position));
-    res->x=0;
-    res->y=0;
+    res->x=2;
+    res->y=1;
     res->dir=KEY_RIGHT;
     res->prev=KEY_RIGHT;
     res->visited=false;

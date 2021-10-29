@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <time.h>
+#include <ctype.h>
 
 #include "snake.h"
 
@@ -18,22 +19,26 @@ int main() {
     my--;
 
     keypad(stdscr, TRUE);
-    nodelay(stdscr, TRUE); 
     noecho();
 
-    initSnake();
-    lastHit = 0;
     srand(time(NULL));
 
-    mvaddch(my/2,mx/2,'*');
+    startGame();
+
 
     for(ticks = 0;;ticks++) {
-        moveHead(snake.head);
-
+        int xpos = snake.head->x;
+        int ypos = snake.head->y;
+        if (xpos > 1 && xpos < mx && ypos > 1 && ypos < my) {
+            moveHead(snake.head);
+        } else {
+            gameOver();
+        }
 
         refresh();
         usleep(150000); // 50000
         mvprintw(my-1,0,"corners: %i length: %i bottom: %i    ",top, length, bottom);
+        mvprintw(my-2,mx/2, "ticks: %i lastHit: %i   ",ticks, lastHit);
         if(top>1) mvprintw(my,0,"top: (%i, %i) bottom: (%i, %i) tail: (%i, %i)    ", 
             corners[top-1]->x, corners[top-1]->y,
             corners[bottom]->x, corners[bottom]->y,
@@ -43,6 +48,20 @@ int main() {
         if (bottom == length/2) freeCorners(bottom);
     }
 
+}
+
+void startGame(){
+    nodelay(stdscr, TRUE); 
+
+    WINDOW *win = newwin(my-4,mx,0,0);
+    box(win, '|', '-');
+    touchwin(win);
+    wrefresh(win);
+
+    initSnake();
+    lastHit = 0;
+    ticks = 0;
+    mvaddch(my/2,mx/2,'*');
 }
 
 void freeCorners(int len) {
@@ -56,7 +75,6 @@ void freeCorners(int len) {
     }
 
     for(i = 0;i+len<length; i++) {
-        mvprintw(my-2,mx/2,"index: %i     ", i);
         res[i] = corners[i+len];
     }
 
@@ -110,15 +128,66 @@ void pushCorner() {
 }
 
 void collect() {
-    lastHit = ticks;
+    if (lastHit > ticks - 3) {
+        lastHit = lastHit + 3;
+    } else {
+        lastHit = ticks;
+    }
+
     int x, y;
     char character;
     do {
-        x = rand() % mx;
-        y = rand() % (my-4);
+        x = rand() % mx-2;
+        y = rand() % (my-6);
         character = mvinch(y,x) & A_CHARTEXT;
-    } while (character != ' ');
-    mvaddch(y,x, '*');
+    } while (!isspace(character));
+    mvprintw(my-3,0,"mx: %i my: %i food: (%i,%i)     ",mx,my,x,y);
+    mvaddch(y+1,x+1, '*');
+}
+
+void gameOver() {
+    for(int i = 0; i < length; i++) {
+        free(corners[i]);
+    }
+
+    nodelay(stdscr, false); 
+
+    WINDOW *win = newwin(10,20,(my/2)-5,(mx/2)-5);
+
+    box(win, '|', '=');
+    mvwprintw(win, 3,5, "GAME OVER");
+    mvwprintw(win, 5,4, "Play again?");
+    mvwprintw(win, 6,8, "Y/N");
+    touchwin(win);
+    wrefresh(win);
+
+    int selection;
+    do {
+        selection = getch();
+        if (selection == 'y') {
+            clear();
+            refresh();
+            startGame();
+        } else if (selection == 'n') {
+            clear();
+            refresh();
+            endwin();
+            exit(0);
+        }
+    } while (selection != 'y' && selection != 'n');
+}
+
+bool check() {
+    Position* head = snake.head;
+    char current = mvinch(head->y, head->x) & A_CHARTEXT;
+    if ((current) == '*'){
+        collect();
+    } else if (!isspace(current)){
+        gameOver();
+        return false; // unreachable
+    } 
+
+    return true;
 }
 
 void moveHead(Position* head) {
@@ -134,16 +203,13 @@ void moveHead(Position* head) {
                 } else {
                     mvaddch(head->y, head->x,'-');    
                 }
-                if ((mvinch(head->y, head->x+1) & A_CHARTEXT) == '*') collect();
-                mvaddch(head->y, head->x+1,'>');
                 head->x++;
+                if(check()) mvaddch(head->y, head->x,'>');
                 head->prev = KEY_RIGHT;
             } else if (head->prev == KEY_LEFT){
                 mvaddch(head->y, head->x,'-');    
                 mvaddch(head->y,head->x-1,'<');
                 head->x--;
-            } else {
-                // out of bounds
             }
             break;
         case KEY_UP: // north
@@ -157,16 +223,13 @@ void moveHead(Position* head) {
                 } else {
                     mvaddch(head->y, head->x, '|');
                 }
-                if ((mvinch(head->y-1, head->x) & A_CHARTEXT) == '*') collect();
-                mvaddch(head->y-1, head->x, '^');
                 head->y--;
+                if (check()) mvaddch(head->y, head->x, '^');
                 head->prev = KEY_UP;
             } else if(head->prev == KEY_DOWN) {
                 mvaddch(head->y, head->x, '|');
                 mvaddch(head->y+1,head->x,'v');
                 head->y++;
-            } else {
-                // out of bounds
             }
             break;
         case KEY_LEFT: // west
@@ -180,16 +243,13 @@ void moveHead(Position* head) {
                 } else {
                     mvaddch(head->y, head->x, '-');
                 }
-                if ((mvinch(head->y, head->x-1) & A_CHARTEXT) == '*') collect();
-                mvaddch(head->y,head->x-1,'<');
                 head->x--;
+                if (check()) mvaddch(head->y,head->x,'<');
                 head->prev = KEY_LEFT;
             } else if(head->prev == KEY_RIGHT){
                 mvaddch(head->y, head->x,'-');    
                 mvaddch(head->y, head->x+1,'>');
                 head->x++;
-            } else {
-                // out of bounds
             }
             break;
         case KEY_DOWN: // south
@@ -203,16 +263,13 @@ void moveHead(Position* head) {
                 } else {
                     mvaddch(head->y, head->x, '|');
                 }
-                if ((mvinch(head->y+1, head->x) & A_CHARTEXT) == '*') collect();
-                mvaddch(head->y+1,head->x,'v');
                 head->y++;
+                if (check()) mvaddch(head->y,head->x,'v');
                 head->prev = KEY_DOWN;
             } else if (head->prev == KEY_UP){
                 mvaddch(head->y, head->x, '|');
                 mvaddch(head->y-1, head->x, '^');
                 head->y--;
-            } else {
-                // out of bounds
             }
             break;
         default:
