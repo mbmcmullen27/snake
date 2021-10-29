@@ -15,8 +15,8 @@ int main() {
     curs_set(0);
     refresh();
     getmaxyx(stdscr,my,mx);
-    mx--;
-    my--;
+    // mx--;
+    // my--;
 
     keypad(stdscr, TRUE);
     noecho();
@@ -29,7 +29,7 @@ int main() {
     for(ticks = 0;;ticks++) {
         int xpos = snake.head->x;
         int ypos = snake.head->y;
-        if (xpos > 1 && xpos < mx && ypos > 1 && ypos < my) {
+        if (xpos > 1 && xpos < mx-2 && ypos > 1 && ypos < my-5) {
             moveHead(snake.head);
         } else {
             gameOver();
@@ -53,10 +53,18 @@ int main() {
 void startGame(){
     nodelay(stdscr, TRUE); 
 
-    WINDOW *win = newwin(my-4,mx,0,0);
-    box(win, '|', '-');
-    touchwin(win);
-    wrefresh(win);
+    // draw border
+    move(0,0);
+    hline('-', mx-1);
+    vline('|',my-4);
+    addch(A_ALTCHARSET | ACS_ULCORNER);
+    move(my-4,0);
+    hline('-', mx-1);
+    addch(A_ALTCHARSET | ACS_LLCORNER);
+    move(0,mx-1);
+    vline('|',my-4);
+    addch(A_ALTCHARSET | ACS_URCORNER);
+    mvaddch(my-4, mx-1,A_ALTCHARSET | ACS_LRCORNER);
 
     initSnake();
     lastHit = 0;
@@ -193,7 +201,7 @@ bool check() {
 void moveHead(Position* head) {
     switch(head->dir) {
         case KEY_RIGHT: // east
-            if(head->x < mx && head->prev != KEY_LEFT) {
+            if(head->prev != KEY_LEFT) {
                 if (head->prev == KEY_UP) {
                     mvaddch(head->y, head->x, A_ALTCHARSET | ACS_ULCORNER);
                     pushCorner();
@@ -213,7 +221,7 @@ void moveHead(Position* head) {
             }
             break;
         case KEY_UP: // north
-            if(head->y > 0 && head->prev != KEY_DOWN) {
+            if(head->prev != KEY_DOWN) {
                 if (head->prev == KEY_LEFT) {
                     mvaddch(head->y, head->x,A_ALTCHARSET | ACS_LLCORNER);
                     pushCorner();
@@ -233,7 +241,7 @@ void moveHead(Position* head) {
             }
             break;
         case KEY_LEFT: // west
-            if(head->x > 0 && head->prev != KEY_RIGHT) {
+            if(head->prev != KEY_RIGHT) {
                 if (head->prev == KEY_UP) {
                     mvaddch(head->y, head->x,A_ALTCHARSET | ACS_URCORNER);
                     pushCorner();
@@ -253,7 +261,7 @@ void moveHead(Position* head) {
             }
             break;
         case KEY_DOWN: // south
-            if(head->y < my && head->prev != KEY_UP) {
+            if(head->prev != KEY_UP) {
                 if (head->prev == KEY_LEFT) {
                     mvaddch(head->y, head->x,A_ALTCHARSET | ACS_ULCORNER);
                     pushCorner();
