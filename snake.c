@@ -145,11 +145,11 @@ void collect() {
     int x, y;
     char character;
     do {
-        x = rand() % mx-2;
-        y = rand() % (my-6);
-        character = mvinch(y,x) & A_CHARTEXT;
+        x = rand() % (mx-2);
+        y = rand() % (my-4);
+        character = mvinch(y+1,x+1) & A_CHARTEXT;
     } while (!isspace(character));
-    mvprintw(my-3,0,"mx: %i my: %i food: (%i,%i)     ",mx,my,x,y);
+    mvprintw(my-3,0,"mx: %i my: %i food: (%i,%i)     ",mx,my,x+1,y+1);
     mvaddch(y+1,x+1, '*');
 }
 
@@ -160,7 +160,7 @@ void gameOver() {
 
     nodelay(stdscr, false); 
 
-    WINDOW *win = newwin(10,20,(my/2)-5,(mx/2)-5);
+    WINDOW *win = newwin(10,20,((my-4)/2)-5,((mx-4)/2)-5);
 
     box(win, '|', '=');
     mvwprintw(win, 3,5, "GAME OVER");
@@ -212,8 +212,10 @@ void moveHead(Position* head) {
                     mvaddch(head->y, head->x,'-');    
                 }
                 head->x++;
-                if(check()) mvaddch(head->y, head->x,'>');
-                head->prev = KEY_RIGHT;
+                if(check()) {
+                    mvaddch(head->y, head->x,'>');
+                    head->prev = KEY_RIGHT;
+                }
             } else if (head->prev == KEY_LEFT){
                 mvaddch(head->y, head->x,'-');    
                 mvaddch(head->y,head->x-1,'<');
@@ -232,8 +234,10 @@ void moveHead(Position* head) {
                     mvaddch(head->y, head->x, '|');
                 }
                 head->y--;
-                if (check()) mvaddch(head->y, head->x, '^');
-                head->prev = KEY_UP;
+                if (check()) {
+                    mvaddch(head->y, head->x, '^');
+                    head->prev = KEY_UP;
+                }
             } else if(head->prev == KEY_DOWN) {
                 mvaddch(head->y, head->x, '|');
                 mvaddch(head->y+1,head->x,'v');
@@ -252,8 +256,10 @@ void moveHead(Position* head) {
                     mvaddch(head->y, head->x, '-');
                 }
                 head->x--;
-                if (check()) mvaddch(head->y,head->x,'<');
-                head->prev = KEY_LEFT;
+                if (check()) {
+                    mvaddch(head->y,head->x,'<');
+                    head->prev = KEY_LEFT;
+                }
             } else if(head->prev == KEY_RIGHT){
                 mvaddch(head->y, head->x,'-');    
                 mvaddch(head->y, head->x+1,'>');
@@ -272,8 +278,10 @@ void moveHead(Position* head) {
                     mvaddch(head->y, head->x, '|');
                 }
                 head->y++;
-                if (check()) mvaddch(head->y,head->x,'v');
-                head->prev = KEY_DOWN;
+                if (check()) {
+                    mvaddch(head->y,head->x,'v');
+                    head->prev = KEY_DOWN;
+                }
             } else if (head->prev == KEY_UP){
                 mvaddch(head->y, head->x, '|');
                 mvaddch(head->y-1, head->x, '^');
