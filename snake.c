@@ -185,8 +185,28 @@ void gameOver() {
     } while (selection != 'y' && selection != 'n');
 }
 
+void printDir(int dir, char* id, int offset) {
+    switch(dir) {
+        case KEY_RIGHT:
+            mvprintw(my-3, mx/2 + offset, "%s: RIGHT   ",id);
+            break;
+        case KEY_UP:
+            mvprintw(my-3, mx/2 + offset, "%s: UP   ",id);
+            break;
+        case KEY_LEFT:
+            mvprintw(my-3, mx/2 + offset, "%s: LEFT    ",id);
+            break;
+        case KEY_DOWN:
+            mvprintw(my-3, mx/2 + offset, "%s: DOWN   ",id);
+            break;
+
+    }
+}
+
 bool check() {
     Position* head = snake.head;
+    printDir(head->dir,"dir", 0);
+    printDir(head->prev,"prev", 12);
     char current = mvinch(head->y, head->x) & A_CHARTEXT;
     if ((current) == '*'){
         collect();
@@ -212,14 +232,15 @@ void moveHead(Position* head) {
                     mvaddch(head->y, head->x,'-');    
                 }
                 head->x++;
-                if(check()) {
-                    mvaddch(head->y, head->x,'>');
-                    head->prev = KEY_RIGHT;
-                }
+                check();
+                mvaddch(head->y, head->x,'>');
+                head->prev = KEY_RIGHT;
+            
             } else if (head->prev == KEY_LEFT){
+                head->x--;
+                check();
                 mvaddch(head->y, head->x,'-');    
                 mvaddch(head->y,head->x-1,'<');
-                head->x--;
             }
             break;
         case KEY_UP: // north
