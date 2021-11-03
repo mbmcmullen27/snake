@@ -15,8 +15,6 @@ int main() {
     curs_set(0);
     refresh();
     getmaxyx(stdscr,my,mx);
-    // mx--;
-    // my--;
 
     keypad(stdscr, TRUE);
     noecho();
@@ -25,25 +23,20 @@ int main() {
 
     startGame();
 
+    int key;
 
     for(ticks = 0;;ticks++) {
-        int xpos = snake.head->x;
-        int ypos = snake.head->y;
-        if (xpos > 1 && xpos < mx-2 && ypos > 1 && ypos < my-5) {
-            moveHead(snake.head);
-        } else {
-            gameOver();
-        }
+        moveHead(snake.head);
 
         refresh();
-        usleep(150000); // 50000
+        usleep(150000); 
         mvprintw(my-1,0,"corners: %i length: %i bottom: %i    ",top, length, bottom);
         mvprintw(my-2,mx/2, "ticks: %i lastHit: %i   ",ticks, lastHit);
         if(top>1) mvprintw(my,0,"top: (%i, %i) bottom: (%i, %i) tail: (%i, %i)    ", 
             corners[top-1]->x, corners[top-1]->y,
             corners[bottom]->x, corners[bottom]->y,
             snake.tail->x, snake.tail->y);
-        int key = getch();
+        key = getch();
         if (key != ERR) snake.head->dir = key;
         if (bottom == length/2) freeCorners(bottom);
     }
@@ -199,7 +192,8 @@ void printDir(int dir, char* id, int offset) {
         case KEY_DOWN:
             mvprintw(my-3, mx/2 + offset, "%s: DOWN   ",id);
             break;
-
+        default:
+            mvprintw(my-3, mx/2 + offset, "%s: %i",id, dir);
     }
 }
 
@@ -232,15 +226,15 @@ void moveHead(Position* head) {
                     mvaddch(head->y, head->x,'-');    
                 }
                 head->x++;
-                check();
-                mvaddch(head->y, head->x,'>');
-                head->prev = KEY_RIGHT;
-            
+                if(check()) {
+                    mvaddch(head->y, head->x,'>');
+                    head->prev = KEY_RIGHT;
+                }
             } else if (head->prev == KEY_LEFT){
-                head->x--;
-                check();
+                // check();
                 mvaddch(head->y, head->x,'-');    
                 mvaddch(head->y,head->x-1,'<');
+                head->x--;
             }
             break;
         case KEY_UP: // north
@@ -260,6 +254,7 @@ void moveHead(Position* head) {
                     head->prev = KEY_UP;
                 }
             } else if(head->prev == KEY_DOWN) {
+                // check
                 mvaddch(head->y, head->x, '|');
                 mvaddch(head->y+1,head->x,'v');
                 head->y++;
