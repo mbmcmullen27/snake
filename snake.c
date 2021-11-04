@@ -147,18 +147,18 @@ void collect() {
 }
 
 void gameOver() {
-    for(int i = 0; i < length; i++) {
+    for(int i = bottom; i < top; i++) {
         free(corners[i]);
     }
 
     nodelay(stdscr, false); 
 
-    WINDOW *win = newwin(10,20,((my-4)/2)-5,((mx-4)/2)-5);
+    WINDOW *win = newwin(11,20,((my-4)/2)-5,((mx-4)/2)-5);
 
     box(win, '|', '=');
     mvwprintw(win, 3,5, "GAME OVER");
     mvwprintw(win, 5,4, "Play again?");
-    mvwprintw(win, 6,8, "Y/N");
+    mvwprintw(win, 7,8, "Y/N");
     touchwin(win);
     wrefresh(win);
 
@@ -194,6 +194,7 @@ void printDir(int dir, char* id, int offset) {
             break;
         default:
             mvprintw(my-3, mx/2 + offset, "%s: %i",id, dir);
+            break;
     }
 }
 
@@ -208,107 +209,118 @@ bool check() {
         gameOver();
         return false; // unreachable
     } 
+    
+    if(ticks>5 && (ticks > lastHit+3)) moveTail(snake.tail);
 
     return true;
+}
+
+void moveRight(){
+    Position* head = snake.head;
+    if (head->prev == KEY_UP) {
+        mvaddch(head->y, head->x, A_ALTCHARSET | ACS_ULCORNER);
+        pushCorner();
+    } else if (head->prev == KEY_DOWN){
+        mvaddch(head->y, head->x, A_ALTCHARSET | ACS_LLCORNER);
+        pushCorner();
+    } else {
+        mvaddch(head->y, head->x,'-');    
+    }
+    head->x++;
+    if(check()) {
+        mvaddch(head->y, head->x,'>');
+        head->prev = KEY_RIGHT;
+    }
+}
+
+void moveLeft() {
+    Position* head = snake.head;
+    if (head->prev == KEY_UP) {
+        mvaddch(head->y, head->x,A_ALTCHARSET | ACS_URCORNER);
+        pushCorner();
+    } else if (head->prev == KEY_DOWN){
+        mvaddch(head->y, head->x,A_ALTCHARSET | ACS_LRCORNER);
+        pushCorner();
+    } else {
+        mvaddch(head->y, head->x, '-');
+    }
+    head->x--;
+    if (check()) {
+        mvaddch(head->y,head->x,'<');
+        head->prev = KEY_LEFT;
+    }
+}
+
+void moveUp() {
+    Position* head = snake.head;
+    if (head->prev == KEY_LEFT) {
+        mvaddch(head->y, head->x,A_ALTCHARSET | ACS_LLCORNER);
+        pushCorner();
+    } else if (head->prev == KEY_RIGHT){
+        mvaddch(head->y, head->x,A_ALTCHARSET | ACS_LRCORNER);
+        pushCorner();
+    } else {
+        mvaddch(head->y, head->x, '|');
+    }
+    head->y--;
+    if (check()) {
+        mvaddch(head->y, head->x, '^');
+        head->prev = KEY_UP;
+    }
+}
+
+void moveDown() {
+    Position* head = snake.head;
+    if (head->prev == KEY_LEFT) {
+        mvaddch(head->y, head->x,A_ALTCHARSET | ACS_ULCORNER);
+        pushCorner();
+    } else if (head->prev == KEY_RIGHT){
+        mvaddch(head->y, head->x,A_ALTCHARSET | ACS_URCORNER);
+        pushCorner();
+    } else {
+        mvaddch(head->y, head->x, '|');
+    }
+    head->y++;
+    if (check()) {
+        mvaddch(head->y,head->x,'v');
+        head->prev = KEY_DOWN;
+    }
 }
 
 void moveHead(Position* head) {
     switch(head->dir) {
         case KEY_RIGHT: // east
-            if(head->prev != KEY_LEFT) {
-                if (head->prev == KEY_UP) {
-                    mvaddch(head->y, head->x, A_ALTCHARSET | ACS_ULCORNER);
-                    pushCorner();
-                } else if (head->prev == KEY_DOWN){
-                    mvaddch(head->y, head->x, A_ALTCHARSET | ACS_LLCORNER);
-                    pushCorner();
-                } else {
-                    mvaddch(head->y, head->x,'-');    
-                }
-                head->x++;
-                if(check()) {
-                    mvaddch(head->y, head->x,'>');
-                    head->prev = KEY_RIGHT;
-                }
-            } else if (head->prev == KEY_LEFT){
-                // check();
-                mvaddch(head->y, head->x,'-');    
-                mvaddch(head->y,head->x-1,'<');
-                head->x--;
+            if(head->prev == KEY_LEFT) {
+                moveLeft();
+            } else {
+                moveRight();
             }
             break;
         case KEY_UP: // north
-            if(head->prev != KEY_DOWN) {
-                if (head->prev == KEY_LEFT) {
-                    mvaddch(head->y, head->x,A_ALTCHARSET | ACS_LLCORNER);
-                    pushCorner();
-                } else if (head->prev == KEY_RIGHT){
-                    mvaddch(head->y, head->x,A_ALTCHARSET | ACS_LRCORNER);
-                    pushCorner();
-                } else {
-                    mvaddch(head->y, head->x, '|');
-                }
-                head->y--;
-                if (check()) {
-                    mvaddch(head->y, head->x, '^');
-                    head->prev = KEY_UP;
-                }
-            } else if(head->prev == KEY_DOWN) {
-                // check
-                mvaddch(head->y, head->x, '|');
-                mvaddch(head->y+1,head->x,'v');
-                head->y++;
+            if(head->prev == KEY_DOWN) {
+                moveDown();
+            } else {
+                moveUp();
             }
             break;
         case KEY_LEFT: // west
-            if(head->prev != KEY_RIGHT) {
-                if (head->prev == KEY_UP) {
-                    mvaddch(head->y, head->x,A_ALTCHARSET | ACS_URCORNER);
-                    pushCorner();
-                } else if (head->prev == KEY_DOWN){
-                    mvaddch(head->y, head->x,A_ALTCHARSET | ACS_LRCORNER);
-                    pushCorner();
-                } else {
-                    mvaddch(head->y, head->x, '-');
-                }
-                head->x--;
-                if (check()) {
-                    mvaddch(head->y,head->x,'<');
-                    head->prev = KEY_LEFT;
-                }
-            } else if(head->prev == KEY_RIGHT){
-                mvaddch(head->y, head->x,'-');    
-                mvaddch(head->y, head->x+1,'>');
-                head->x++;
+            if(head->prev == KEY_RIGHT) {
+                moveRight();
+            } else {
+                moveLeft();
             }
             break;
         case KEY_DOWN: // south
-            if(head->prev != KEY_UP) {
-                if (head->prev == KEY_LEFT) {
-                    mvaddch(head->y, head->x,A_ALTCHARSET | ACS_ULCORNER);
-                    pushCorner();
-                } else if (head->prev == KEY_RIGHT){
-                    mvaddch(head->y, head->x,A_ALTCHARSET | ACS_URCORNER);
-                    pushCorner();
-                } else {
-                    mvaddch(head->y, head->x, '|');
-                }
-                head->y++;
-                if (check()) {
-                    mvaddch(head->y,head->x,'v');
-                    head->prev = KEY_DOWN;
-                }
-            } else if (head->prev == KEY_UP){
-                mvaddch(head->y, head->x, '|');
-                mvaddch(head->y-1, head->x, '^');
-                head->y--;
+            if(head->prev == KEY_UP) {
+                moveUp();
+            } else {
+                moveDown();
             }
             break;
         default:
             break;
     }
 
-    if(ticks>5 && (ticks > lastHit+3)) moveTail(snake.tail);
 }
 
 void moveTail(Position* tail) {
