@@ -7,6 +7,9 @@
 #include "snake.h"
 
 Snake snake;
+Corner* top;
+Corner* bottom;
+
 int ticks;
 int lastHit;
 
@@ -30,15 +33,14 @@ int main() {
 
         refresh();
         usleep(150000); 
-        mvprintw(my-1,0,"corners: %i length: %i bottom: %i    ",top, length, bottom);
+        // mvprintw(my-1,0,"corners: %i length: %i bottom: %i    ",top, length, bottom);
         mvprintw(my-2,mx/2, "ticks: %i lastHit: %i   ",ticks, lastHit);
-        if(top>1) mvprintw(my,0,"top: (%i, %i) bottom: (%i, %i) tail: (%i, %i)    ", 
-            corners[top-1]->x, corners[top-1]->y,
-            corners[bottom]->x, corners[bottom]->y,
-            snake.tail->x, snake.tail->y);
+        // mvprintw(my,0,"top: (%i, %i) bottom: (%i, %i) tail: (%i, %i)    ", 
+        //     top->position->x, top->position->y,
+        //     bottom->position->x, bottom->position->y,
+        //     snake.tail->x, snake.tail->y);
         key = getch();
         if (key != ERR) snake.head->dir = key;
-        if (bottom == length/2) freeCorners(bottom);
     }
 
 }
@@ -66,66 +68,37 @@ void startGame(){
 }
 
 void freeCorners(int len) {
-    mvprintw(my-2,0,"Reduced at %i     ", top-1);
-
-    int i;
-    Position** res = malloc(sizeof(Position*)*(length-len));
-
-    for(i = 0; i < len; i++) {
-        free(corners[i]);
-    }
-
-    for(i = 0;i+len<length; i++) {
-        res[i] = corners[i+len];
-    }
-
-    free(corners);
-    corners = res;
-    length = length - len;
-    top = top - len;
-    bottom = bottom - len;
 }
 
 void initSnake() {
-    length=4;
-    corners = malloc(sizeof(Position*)*length);
-    top=0;
-    bottom=0;
 
     Position* head = initPosition();
     Position* tail = initPosition();
 
     head->y = my/2;
     tail->y = my/2;
+    head->dir = KEY_RIGHT;
+    
+    snake.corners = initCorner(0,head->y,KEY_RIGHT);
+    top = bottom = snake.corners;
 
     snake.head = head;
     snake.tail = tail;
-    pushCorner();
 }
 
-Position* initCorner(int x, int y, int dir) {
-    Position* res = malloc(sizeof(Position));
-    res->x=x;
-    res->y=y;
-    res->dir=dir;
-    res->visited=false;
+Corner* initCorner(int x, int y, int dir) {
+    Corner* res = malloc(sizeof(Corner));
+    res->position->x=x;
+    res->position->y=y;
+    res->position->dir=dir;
+    res->next=NULL;
     return res;
 }
 
-void expandCorners() {
-    mvprintw(my-2,0,"Expanded at %i", top);
-    length*=2;
-    Position** temp = realloc(corners, length*sizeof(Position*));   
-    corners = temp;
-}
-
 void pushCorner() {
-    if(top==length-1) expandCorners();
-    
     Position* pos = snake.head;
-    corners[top] = initCorner(pos->x,pos->y,pos->dir);
-    if(corners[bottom]->visited) bottom++;
-    top++;
+    top->next = initCorner(pos->x,pos->y,pos->dir);
+    top = top->next; 
 }
 
 void collect() {
@@ -147,8 +120,10 @@ void collect() {
 }
 
 void gameOver() {
-    for(int i = bottom; i < top; i++) {
-        free(corners[i]);
+    while (bottom!=NULL) {
+        Corner* temp = bottom;
+        bottom = bottom->next;
+        free(temp);
     }
 
     nodelay(stdscr, false); 
@@ -210,7 +185,7 @@ bool check() {
         return false; // unreachable
     } 
     
-    if(ticks>5 && (ticks > lastHit+3)) moveTail(snake.tail);
+    // if(ticks>5 && (ticks > lastHit+3)) moveTail(snake.tail);
 
     return true;
 }
@@ -327,16 +302,13 @@ void moveTail(Position* tail) {
     
     mvaddch(tail->y, tail->x, ' ');
     
-    if (bottom < length && tail->x == corners[bottom]->x && tail->y == corners[bottom]->y) {
-        tail->dir = corners[bottom]->dir;
-        corners[bottom]->visited=true;
-        if(bottom<top-1){
-            bottom++;
+    if (tail->x == bottom->position->x && 
+        tail->y == bottom->position->y) {
+
+        tail->dir = bottom->position->dir;
+        if(bottom!=top){
+            // bottom = bottom->next;
         }
-    } else if (tail->x == corners[top-1]->x && tail->y == corners[top-1]->y) {
-        tail->dir = corners[top-1]->dir;
-        corners[bottom]->visited=true;
-        bottom++;
     }
 
     switch(tail->dir) {

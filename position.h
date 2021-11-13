@@ -9,7 +9,6 @@ typedef struct {
     int y;
     int dir;
     int prev;
-    bool visited;
 } Position;
 
 Position* initPosition();
