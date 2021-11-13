@@ -6,7 +6,6 @@
 typedef struct {
     Position* head;
     Position* tail;
-    Corner* corners;
 } Snake;
 
 void initSnake();
