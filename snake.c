@@ -7,6 +7,9 @@
 #include "snake.h"
 
 Snake snake;
+Corner* top;
+Corner* bottom;
+
 int ticks;
 int lastHit;
 
@@ -30,15 +33,14 @@ int main() {
 
         refresh();
         usleep(150000); 
-        mvprintw(my-1,0,"corners: %i length: %i bottom: %i    ",top, length, bottom);
+
         mvprintw(my-2,mx/2, "ticks: %i lastHit: %i   ",ticks, lastHit);
-        if(top>1) mvprintw(my,0,"top: (%i, %i) bottom: (%i, %i) tail: (%i, %i)    ", 
-            corners[top-1]->x, corners[top-1]->y,
-            corners[bottom]->x, corners[bottom]->y,
-            snake.tail->x, snake.tail->y);
+        printPos("top", top->position, my-3, 0);
+        printPos("bottom", bottom->position, my-2, 0);
+        printPos("tail", snake.tail, my-1, 0);
+        
         key = getch();
         if (key != ERR) snake.head->dir = key;
-        if (bottom == length/2) freeCorners(bottom);
     }
 
 }
@@ -65,67 +67,52 @@ void startGame(){
     mvaddch(my/2,mx/2,'*');
 }
 
-void freeCorners(int len) {
-    mvprintw(my-2,0,"Reduced at %i     ", top-1);
-
-    int i;
-    Position** res = malloc(sizeof(Position*)*(length-len));
-
-    for(i = 0; i < len; i++) {
-        free(corners[i]);
-    }
-
-    for(i = 0;i+len<length; i++) {
-        res[i] = corners[i+len];
-    }
-
-    free(corners);
-    corners = res;
-    length = length - len;
-    top = top - len;
-    bottom = bottom - len;
-}
-
 void initSnake() {
-    length=4;
-    corners = malloc(sizeof(Position*)*length);
-    top=0;
-    bottom=0;
 
     Position* head = initPosition();
     Position* tail = initPosition();
+    top = bottom = initCorner(0,head->y,KEY_RIGHT);
+    bottom->visited = true;
 
     head->y = my/2;
     tail->y = my/2;
+    head->dir = KEY_RIGHT;
 
     snake.head = head;
     snake.tail = tail;
-    pushCorner();
 }
 
-Position* initCorner(int x, int y, int dir) {
-    Position* res = malloc(sizeof(Position));
-    res->x=x;
-    res->y=y;
-    res->dir=dir;
+Corner* initCorner(int x, int y, int dir) {
+    Corner* res = malloc(sizeof(Corner));
+    res->position = initPosition();
+    res->position->x=x;
+    res->position->y=y;
+    res->position->dir=dir;
     res->visited=false;
+    res->next=NULL;
     return res;
 }
 
-void expandCorners() {
-    mvprintw(my-2,0,"Expanded at %i", top);
-    length*=2;
-    Position** temp = realloc(corners, length*sizeof(Position*));   
-    corners = temp;
+void freeCorner() {
+    Corner* temp = bottom;
+    bottom=bottom->next;
+    free(temp->position);
+    free(temp);
 }
 
 void pushCorner() {
-    if(top==length-1) expandCorners();
-    
     Position* pos = snake.head;
-    corners[top] = initCorner(pos->x,pos->y,pos->dir);
-    if(corners[bottom]->visited) bottom++;
-    top++;
+    Corner* res = initCorner(pos->x,pos->y,pos->dir); 
+    top->next = res; 
+    top = top->next; 
+    if(bottom->visited) bottom=top;
+}
+
+void popCorner() {
+    bottom->visited=true;
+    if(bottom->next != NULL) {
+        freeCorner();
+    }
 }
 
 void collect() {
@@ -142,13 +129,13 @@ void collect() {
         y = rand() % (my-4);
         character = mvinch(y+1,x+1) & A_CHARTEXT;
     } while (!isspace(character));
-    mvprintw(my-3,0,"mx: %i my: %i food: (%i,%i)     ",mx,my,x+1,y+1);
+    mvprintw(my-1,mx/2,"mx: %i my: %i food: (%i,%i)     ",mx,my,x+1,y+1);
     mvaddch(y+1,x+1, '*');
 }
 
 void gameOver() {
-    for(int i = bottom; i < top; i++) {
-        free(corners[i]);
+    while (bottom!=NULL) {
+        freeCorner();
     }
 
     nodelay(stdscr, false); 
@@ -178,30 +165,35 @@ void gameOver() {
     } while (selection != 'y' && selection != 'n');
 }
 
-void printDir(int dir, char* id, int offset) {
+void printDir(int dir, char* id, int y, int x) {
     switch(dir) {
         case KEY_RIGHT:
-            mvprintw(my-3, mx/2 + offset, "%s: RIGHT   ",id);
+            mvprintw(y, x, "%s: RIGHT   ",id);
             break;
         case KEY_UP:
-            mvprintw(my-3, mx/2 + offset, "%s: UP   ",id);
+            mvprintw(y, x, "%s: UP   ",id);
             break;
         case KEY_LEFT:
-            mvprintw(my-3, mx/2 + offset, "%s: LEFT    ",id);
+            mvprintw(y, x, "%s: LEFT    ",id);
             break;
         case KEY_DOWN:
-            mvprintw(my-3, mx/2 + offset, "%s: DOWN   ",id);
+            mvprintw(y, x, "%s: DOWN   ",id);
             break;
         default:
-            mvprintw(my-3, mx/2 + offset, "%s: %i",id, dir);
+            mvprintw(y, x, "%s: %i",id, dir);
             break;
     }
 }
 
+void printPos(char* name, Position* pos, int y, int x) {
+    mvprintw(y,x,"%s: (%i, %i)    ", name, pos->x, pos->y);
+    printDir(pos->dir,"dir",y, x+18);
+}
+
 bool check() {
     Position* head = snake.head;
-    printDir(head->dir,"dir", 0);
-    printDir(head->prev,"prev", 12);
+    printDir(head->dir,"dir", my-3, mx/2);
+    printDir(head->prev,"prev", my-3, (mx/2)+12);
     char current = mvinch(head->y, head->x) & A_CHARTEXT;
     if ((current) == '*'){
         collect();
@@ -327,17 +319,10 @@ void moveTail(Position* tail) {
     
     mvaddch(tail->y, tail->x, ' ');
     
-    if (bottom < length && tail->x == corners[bottom]->x && tail->y == corners[bottom]->y) {
-        tail->dir = corners[bottom]->dir;
-        corners[bottom]->visited=true;
-        if(bottom<top-1){
-            bottom++;
-        }
-    } else if (tail->x == corners[top-1]->x && tail->y == corners[top-1]->y) {
-        tail->dir = corners[top-1]->dir;
-        corners[bottom]->visited=true;
-        bottom++;
-    }
+    if (tail->x == bottom->position->x && tail->y == bottom->position->y) {
+        tail->dir = bottom->position->dir;
+        popCorner();
+    } 
 
     switch(tail->dir) {
         case KEY_RIGHT:

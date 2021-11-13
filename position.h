@@ -9,9 +9,20 @@ typedef struct {
     int y;
     int dir;
     int prev;
-    bool visited;
 } Position;
 
+typedef struct Corner{
+    struct Corner* next;
+    bool visited;
+    Position* position;
+} Corner;
+
+
 Position* initPosition();
+Corner* initCorner(int x, int y, int dir);
+void pushCorner();
+void popCorner();
+void freeCorners(int len);
+void printPos(char* name, Position* pos, int y, int x); 
 
 #endif
