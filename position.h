@@ -11,6 +11,17 @@ typedef struct {
     int prev;
 } Position;
 
+typedef struct Corner{
+    struct Corner* next;
+    bool visited;
+    Position* position;
+} Corner;
+
+
 Position* initPosition();
+Corner* initCorner(int x, int y, int dir);
+void pushCorner();
+void popCorner();
+void freeCorners(int len);
 
 #endif

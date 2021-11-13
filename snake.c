@@ -35,10 +35,10 @@ int main() {
         usleep(150000); 
         // mvprintw(my-1,0,"corners: %i length: %i bottom: %i    ",top, length, bottom);
         mvprintw(my-2,mx/2, "ticks: %i lastHit: %i   ",ticks, lastHit);
-        // mvprintw(my,0,"top: (%i, %i) bottom: (%i, %i) tail: (%i, %i)    ", 
-        //     top->position->x, top->position->y,
-        //     bottom->position->x, bottom->position->y,
-        //     snake.tail->x, snake.tail->y);
+        mvprintw(my-2,0,"top: (%i, %i) bottom: (%i, %i) tail: (%i, %i)    ", 
+            top->position->x, top->position->y,
+            bottom->position->x, bottom->position->y,
+            snake.tail->x, snake.tail->y);
         key = getch();
         if (key != ERR) snake.head->dir = key;
     }
@@ -74,13 +74,14 @@ void initSnake() {
 
     Position* head = initPosition();
     Position* tail = initPosition();
+    snake.corners = initCorner(0,head->y,KEY_RIGHT);
 
     head->y = my/2;
     tail->y = my/2;
     head->dir = KEY_RIGHT;
     
-    snake.corners = initCorner(0,head->y,KEY_RIGHT);
     top = bottom = snake.corners;
+    bottom->visited = true;
 
     snake.head = head;
     snake.tail = tail;
@@ -88,17 +89,28 @@ void initSnake() {
 
 Corner* initCorner(int x, int y, int dir) {
     Corner* res = malloc(sizeof(Corner));
+    res->position = initPosition();
     res->position->x=x;
     res->position->y=y;
     res->position->dir=dir;
+    res->visited=false;
     res->next=NULL;
     return res;
 }
 
 void pushCorner() {
     Position* pos = snake.head;
-    top->next = initCorner(pos->x,pos->y,pos->dir);
+    Corner* res = initCorner(pos->x,pos->y,pos->dir); 
+    top->next = res; 
     top = top->next; 
+    if(bottom->visited) bottom=top;
+}
+
+void popCorner() {
+    bottom->visited=true;
+    if(bottom->next != NULL) {
+       bottom=bottom->next;
+    }
 }
 
 void collect() {
@@ -120,6 +132,7 @@ void collect() {
 }
 
 void gameOver() {
+    bottom = snake.corners;
     while (bottom!=NULL) {
         Corner* temp = bottom;
         bottom = bottom->next;
@@ -153,30 +166,34 @@ void gameOver() {
     } while (selection != 'y' && selection != 'n');
 }
 
-void printDir(int dir, char* id, int offset) {
+void printDir(int dir, char* id, int y, int x) {
     switch(dir) {
         case KEY_RIGHT:
-            mvprintw(my-3, mx/2 + offset, "%s: RIGHT   ",id);
+            mvprintw(y, x, "%s: RIGHT   ",id);
             break;
         case KEY_UP:
-            mvprintw(my-3, mx/2 + offset, "%s: UP   ",id);
+            mvprintw(y, x, "%s: UP   ",id);
             break;
         case KEY_LEFT:
-            mvprintw(my-3, mx/2 + offset, "%s: LEFT    ",id);
+            mvprintw(y, x, "%s: LEFT    ",id);
             break;
         case KEY_DOWN:
-            mvprintw(my-3, mx/2 + offset, "%s: DOWN   ",id);
+            mvprintw(y, x, "%s: DOWN   ",id);
             break;
         default:
-            mvprintw(my-3, mx/2 + offset, "%s: %i",id, dir);
+            mvprintw(y, x, "%s: %i",id, dir);
             break;
     }
 }
 
+void printPos(Position* pos, int y, int x) {
+
+}
+
 bool check() {
     Position* head = snake.head;
-    printDir(head->dir,"dir", 0);
-    printDir(head->prev,"prev", 12);
+    printDir(head->dir,"dir", my-3, mx/2);
+    printDir(head->prev,"prev", my-3, (mx/2)+12);
     char current = mvinch(head->y, head->x) & A_CHARTEXT;
     if ((current) == '*'){
         collect();
@@ -185,7 +202,7 @@ bool check() {
         return false; // unreachable
     } 
     
-    // if(ticks>5 && (ticks > lastHit+3)) moveTail(snake.tail);
+    if(ticks>5 && (ticks > lastHit+3)) moveTail(snake.tail);
 
     return true;
 }
@@ -303,13 +320,17 @@ void moveTail(Position* tail) {
     mvaddch(tail->y, tail->x, ' ');
     
     if (tail->x == bottom->position->x && 
-        tail->y == bottom->position->y) {
-
+            tail->y == bottom->position->y) {
         tail->dir = bottom->position->dir;
-        if(bottom!=top){
-            // bottom = bottom->next;
-        }
-    }
+        popCorner();
+    } 
+    // else if (tail->x == top->position->x &&
+    //         tail->y == top->position->y) {
+    //     tail->dir = top->position->dir;
+    //     bottom->visited=true;
+    //     bottom=bottom->next;
+
+    // }
 
     switch(tail->dir) {
         case KEY_RIGHT:
