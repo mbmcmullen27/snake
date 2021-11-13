@@ -67,21 +67,16 @@ void startGame(){
     mvaddch(my/2,mx/2,'*');
 }
 
-void freeCorners(int len) {
-}
-
 void initSnake() {
 
     Position* head = initPosition();
     Position* tail = initPosition();
-    snake.corners = initCorner(0,head->y,KEY_RIGHT);
+    top = bottom = initCorner(0,head->y,KEY_RIGHT);
+    bottom->visited = true;
 
     head->y = my/2;
     tail->y = my/2;
     head->dir = KEY_RIGHT;
-    
-    top = bottom = snake.corners;
-    bottom->visited = true;
 
     snake.head = head;
     snake.tail = tail;
@@ -98,6 +93,13 @@ Corner* initCorner(int x, int y, int dir) {
     return res;
 }
 
+void freeCorner() {
+    Corner* temp = bottom;
+    bottom=bottom->next;
+    free(temp->position);
+    free(temp);
+}
+
 void pushCorner() {
     Position* pos = snake.head;
     Corner* res = initCorner(pos->x,pos->y,pos->dir); 
@@ -109,9 +111,7 @@ void pushCorner() {
 void popCorner() {
     bottom->visited=true;
     if(bottom->next != NULL) {
-        Corner* temp = bottom;
-        bottom=bottom->next;
-        free(temp);
+        freeCorner();
     }
 }
 
@@ -135,10 +135,7 @@ void collect() {
 
 void gameOver() {
     while (bottom!=NULL) {
-        Corner* temp = bottom;
-        bottom = bottom->next;
-        free(temp->position);
-        free(temp);
+        freeCorner();
     }
 
     nodelay(stdscr, false); 
