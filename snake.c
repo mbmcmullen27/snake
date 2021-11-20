@@ -6,12 +6,17 @@
 
 #include "snake.h"
 
+#ifndef CTRL
+#define CTRL(c) ((c) & 0x1f)
+#endif
+
 Snake snake;
 Corner* top;
 Corner* bottom;
 
 int ticks;
 int lastHit;
+int mx, my;
 
 int main() {
     initscr();
@@ -30,6 +35,7 @@ int main() {
 
     for(ticks = 0;;ticks++) {
         moveHead(snake.head);
+        if(ticks>5 && (ticks > lastHit+3)) moveTail(snake.tail);
 
         refresh();
         usleep(150000); 
@@ -42,7 +48,6 @@ int main() {
         key = getch();
         if (key != ERR) snake.head->dir = key;
     }
-
 }
 
 void startGame(){
@@ -68,7 +73,6 @@ void startGame(){
 }
 
 void initSnake() {
-
     Position* head = initPosition();
     Position* tail = initPosition();
     top = bottom = initCorner(0,head->y,KEY_RIGHT);
@@ -80,17 +84,6 @@ void initSnake() {
 
     snake.head = head;
     snake.tail = tail;
-}
-
-Corner* initCorner(int x, int y, int dir) {
-    Corner* res = malloc(sizeof(Corner));
-    res->position = initPosition();
-    res->position->x=x;
-    res->position->y=y;
-    res->position->dir=dir;
-    res->visited=false;
-    res->next=NULL;
-    return res;
 }
 
 void freeCorner() {
@@ -201,8 +194,6 @@ bool check() {
         gameOver();
         return false; // unreachable
     } 
-    
-    if(ticks>5 && (ticks > lastHit+3)) moveTail(snake.tail);
 
     return true;
 }
@@ -281,6 +272,9 @@ void moveDown() {
 
 void moveHead(Position* head) {
     switch(head->dir) {
+        case CTRL(KEY_RIGHT):
+        case KEY_SRIGHT:
+            head->dir = KEY_RIGHT;
         case KEY_RIGHT: // east
             if(head->prev == KEY_LEFT) {
                 moveLeft();
@@ -288,6 +282,7 @@ void moveHead(Position* head) {
                 moveRight();
             }
             break;
+        case CTRL(KEY_UP):
         case KEY_UP: // north
             if(head->prev == KEY_DOWN) {
                 moveDown();
@@ -295,6 +290,9 @@ void moveHead(Position* head) {
                 moveUp();
             }
             break;
+        case CTRL(KEY_LEFT):
+        case KEY_SLEFT:
+            head->dir = KEY_LEFT;
         case KEY_LEFT: // west
             if(head->prev == KEY_RIGHT) {
                 moveRight();
@@ -302,6 +300,7 @@ void moveHead(Position* head) {
                 moveLeft();
             }
             break;
+        case CTRL(KEY_DOWN):
         case KEY_DOWN: // south
             if(head->prev == KEY_UP) {
                 moveUp();
@@ -312,11 +311,9 @@ void moveHead(Position* head) {
         default:
             break;
     }
-
 }
 
 void moveTail(Position* tail) {
-    
     mvaddch(tail->y, tail->x, ' ');
     
     if (tail->x == bottom->position->x && tail->y == bottom->position->y) {
@@ -338,5 +335,4 @@ void moveTail(Position* tail) {
             if(snake.head->y < my) tail->y++;
             break;
     }
-       
 }
