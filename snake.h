@@ -11,7 +11,7 @@ typedef struct {
 void initSnake();
 void startGame();
 void gameOver();
-void moveHead(Position* head);
+void moveHead(Snake* snake, int dir);
 void moveTail(Position* tail);
 
 #endif

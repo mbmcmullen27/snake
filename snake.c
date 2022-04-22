@@ -34,7 +34,7 @@ int main() {
     int key;
 
     for(ticks = 0;;ticks++) {
-        moveHead(snake.head);
+        moveHead(&snake, snake.head->dir);
         if(ticks>5 && (ticks > lastHit+3)) moveTail(snake.tail);
 
         refresh();
@@ -270,11 +270,12 @@ void moveDown() {
     }
 }
 
-void moveHead(Position* head) {
-    switch(head->dir) {
-        case CTRL(KEY_RIGHT):
-        case KEY_SRIGHT:
-            head->dir = KEY_RIGHT;
+void moveHead(Snake* snake, int dir) {
+    Position* head = snake->head;
+    switch(dir) {
+        case 'd':
+        case 'l':
+            head->dir=KEY_RIGHT;
         case KEY_RIGHT: // east
             if(head->prev == KEY_LEFT) {
                 moveLeft();
@@ -282,7 +283,9 @@ void moveHead(Position* head) {
                 moveRight();
             }
             break;
-        case CTRL(KEY_UP):
+        case 'w':
+        case 'k':
+            head->dir=KEY_UP;
         case KEY_UP: // north
             if(head->prev == KEY_DOWN) {
                 moveDown();
@@ -290,9 +293,9 @@ void moveHead(Position* head) {
                 moveUp();
             }
             break;
-        case CTRL(KEY_LEFT):
-        case KEY_SLEFT:
-            head->dir = KEY_LEFT;
+        case 'a':
+        case 'h':
+            head->dir=KEY_LEFT;
         case KEY_LEFT: // west
             if(head->prev == KEY_RIGHT) {
                 moveRight();
@@ -300,7 +303,9 @@ void moveHead(Position* head) {
                 moveLeft();
             }
             break;
-        case CTRL(KEY_DOWN):
+        case 's':
+        case 'j':
+            head->dir=KEY_DOWN;
         case KEY_DOWN: // south
             if(head->prev == KEY_UP) {
                 moveUp();
@@ -309,6 +314,7 @@ void moveHead(Position* head) {
             }
             break;
         default:
+            moveHead(snake, snake->head->prev);
             break;
     }
 }
