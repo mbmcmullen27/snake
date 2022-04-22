@@ -1,16 +1,20 @@
-snake: snake.o position.o pyClient.o
-	clang -lncurses snake.o position.o $(python3-config --embed --ldflags) -o snake
-snake.o: snake.c snake.h position.h
-	clang -c snake.c -o snake.o
-position.o: position.c position.h
-	clang -c position.c -o position.o
-pyClient.o: pyClient.c pyClient.h
-	clang $(python3-config --cflags --embed) -c pyClient.c -o pyClient.o
+snake: dist/snake.o dist/position.o dist/game.o
+	clang -lncurses dist/snake.o dist/position.o dist/game.o -o snake
+dist/snake.o: src/snake.c src/snake.h src/position.h
+	clang -c src/snake.c -o dist/snake.o
+dist/position.o: src/position.c src/position.h
+	clang -c src/position.c -o dist/position.o
+dist/game.o: src/game.c src/game.h src/snake.h
+	clang -c src/game.c -o dist/game.o
 
-test: test.o
-	clang test.o -o test
-test.o: test.c position.h
-	clang -c test.c -o test.o
+test: dist/test.o
+	clang dist/test.o -o test
+dist/test.o: src/test.c src/position.h
+	clang -c src/test.c -o dist/test.o
+
+$(shell [ -d dist ] || mkdir dist)
 
 clean:
-	rm *.o snake test
+	$(shell rm snake test 2>/dev/null)
+	$(shell rm -r dist 2>/dev/null)
+

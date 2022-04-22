@@ -1,6 +1,6 @@
 #include <curses.h>
 
-#include "pyClient.h"
+//#include "pyClient.h"
 #include "snake.h"
 
 void startGame();
