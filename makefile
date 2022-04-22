@@ -12,7 +12,7 @@ test: dist/test.o
 dist/test.o: src/test.c src/position.h
 	clang -c src/test.c -o dist/test.o
 
-$(shell [ -d dist ] || mkdir dist)
+$(shell mkdir dist 2>/dev/null)
 
 clean:
 	$(shell rm snake test 2>/dev/null)
