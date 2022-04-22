@@ -1,4 +1,4 @@
-#include "pyClient.h"
+include "game.h"
 
 #ifndef CTRL
 #define CTRL(c) ((c) & 0x1f)
@@ -26,8 +26,8 @@ int main() {
     int key;
 
     for(ticks = 0;;ticks++) {
-        moveHead(snake.head);
-        if(ticks>5 && (ticks > lastHit+3)) moveTail(snake.tail);
+        moveHead(&snake, snake.head->dir);
+        if(ticks>5 && (ticks > lastHit+3)) moveTail(&snake);
 
         refresh();
         usleep(150000); 
@@ -58,7 +58,7 @@ void startGame(){
     addch(A_ALTCHARSET | ACS_URCORNER);
     mvaddch(my-4, mx-1,A_ALTCHARSET | ACS_LRCORNER);
 
-    snake = initSnake();
+    snake = initSnake(my);
     lastHit = 0;
     ticks = 0;
     mvaddch(my/2,mx/2,'*');
@@ -127,4 +127,29 @@ bool check() {
     } 
 
     return true;
+}
+
+void printDir(int dir, char* id, int y, int x) {
+    switch(dir) {
+        case KEY_RIGHT:
+            mvprintw(y, x, "%s: RIGHT   ",id);
+            break;
+        case KEY_UP:
+            mvprintw(y, x, "%s: UP   ",id);
+            break;
+        case KEY_LEFT:
+            mvprintw(y, x, "%s: LEFT    ",id);
+            break;
+        case KEY_DOWN:
+            mvprintw(y, x, "%s: DOWN   ",id);
+            break;
+        default:
+            mvprintw(y, x, "%s: %i",id, dir);
+            break;
+    }
+}
+
+void printPos(char* name, Position* pos, int y, int x) {
+    mvprintw(y,x,"%s: (%i, %i)    ", name, pos->x, pos->y);
+    printDir(pos->dir,"dir",y, x+18);
 }
