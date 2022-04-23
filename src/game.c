@@ -82,6 +82,8 @@ void gameOver() {
 
     WINDOW *win = newwin(11,20,((my-4)/2)-5,((mx-4)/2)-5);
 
+    deletePods();
+
     box(win, '|', '=');
     mvwprintw(win, 3,5, "GAME OVER");
     mvwprintw(win, 5,4, "Play again?");

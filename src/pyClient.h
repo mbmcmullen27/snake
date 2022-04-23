@@ -7,6 +7,8 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-int createPod();
+void createPod();
+void deletePods();
+int executeScript(char* script);
 
 #endif
