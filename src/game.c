@@ -1,9 +1,5 @@
 #include "game.h"
 
-#ifndef CTRL
-#define CTRL(c) ((c) & 0x1f)
-#endif
-
 int ticks;
 int lastHit;
 int mx, my;
@@ -116,6 +112,7 @@ bool check() {
     char current = mvinch(head->y, head->x) & A_CHARTEXT;
     if ((current) == '*'){
         collect();
+        createPod();
     } else if (!isspace(current)){
         gameOver();
         return false; // unreachable
