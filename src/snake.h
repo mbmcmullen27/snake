@@ -17,11 +17,11 @@ typedef struct {
 } Snake;
 
 Snake* initSnake(int my);
-void freeCorner(Snake* snake);
-void freeCorners(Snake* snake);
-void pushCorner(Snake* snake);
-void popCorner(Snake* snake);
-void printDebug(Snake* snake, int mx, int my);
+void freeCorner(Snake*);
+void freeCorners(Snake*);
+void pushCorner(Snake*);
+void popCorner(Snake*);
+void printDebug(Snake*, int mx, int my);
 void printDir(int, char*, int, int);
 void printPos(char*, Position*, int, int);
 
