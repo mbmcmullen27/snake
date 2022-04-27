@@ -1,13 +1,11 @@
 #include "snake.h"
 
-Corner* top;
-Corner* bottom;
-
-void initSnake(Snake* snake, int my) {
+Snake* initSnake(int my) {
+    Snake* snake = malloc(sizeof(Snake));
     Position* head = initPosition();
     Position* tail = initPosition();
-    top = bottom = initCorner(0,head->y,KEY_RIGHT);
-    bottom->visited = true;
+    snake->top = snake->bottom = initCorner(0,head->y,KEY_RIGHT);
+    snake->bottom->visited = true;
 
     head->y = my/2;
     tail->y = my/2;
@@ -15,37 +13,35 @@ void initSnake(Snake* snake, int my) {
 
     snake->head = head;
     snake->tail = tail;
+
+    return snake;
 }
 
-Position* bottomPos() {
-    return bottom->position;
-}
-
-void freeCorner() {
-    Corner* temp = bottom;
-    bottom=bottom->next;
+void freeCorner(Snake* snake) {
+    Corner* temp = snake->bottom;
+    snake->bottom=snake->bottom->next;
     free(temp->position);
     free(temp);
 }
 
-void freeCorners() {
-    while (bottom!=NULL) {
-        freeCorner();
+void freeCorners(Snake* snake) {
+    while (snake->bottom!=NULL) {
+        freeCorner(snake);
     }
 }
 
 void pushCorner(Snake* snake) {
     Position* pos = snake->head;
     Corner* res = initCorner(pos->x,pos->y,pos->dir); 
-    top->next = res; 
-    top = top->next; 
-    if(bottom->visited) bottom=top;
+    snake->top->next = res; 
+    snake->top = snake->top->next; 
+    if(snake->bottom->visited) snake->bottom=snake->top;
 }
 
-void popCorner() {
-    bottom->visited=true;
-    if(bottom->next != NULL) {
-        freeCorner();
+void popCorner(Snake* snake) {
+    snake->bottom->visited=true;
+    if(snake->bottom->next != NULL) {
+        freeCorner(snake);
     }
 }
 
@@ -75,7 +71,7 @@ void printPos(char* name, Position* pos, int y, int x) {
 }
 
 void printDebug(Snake* snake, int mx, int my) {
-    printPos("top", top->position, my-3, 0);
-    printPos("bottom", bottom->position, my-2, 0);
+    printPos("top", snake->top->position, my-3, 0);
+    printPos("bottom", snake->bottom->position, my-2, 0);
     printPos("tail", snake->tail, my-1, 0);
 }

@@ -6,11 +6,23 @@
 #include "pyClient.h"
 #include "snake.h"
 
-void startGame();
+typedef struct {
+    int ticks;
+    int lastHit;
+    int mx;
+    int my;
+    Snake* snake;
+} Game;
+
 void collect();
-void gameOver();
-bool check();
-void printDir(int, char*, int, int);
-void printPos(char*, Position*, int, int);
+bool check(Game* game);
+void startGame(Game* game);
+void gameOver(Game* game);
+void moveHead(Game* game, int dir);
+void moveTail(Game* game);
+void moveUp(Game* game);
+void moveDown(Game* game);
+void moveLeft(Game* game);
+void moveRight(Game* game);
 
 #endif
