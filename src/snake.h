@@ -12,15 +12,17 @@
 typedef struct {
     Position* head;
     Position* tail;
+    Corner* top;
+    Corner* bottom;
 } Snake;
 
 void initSnake(Snake* snake, int my);
-Position* bottomPos();
+Position* bottomPos(Snake* snake);
 void startGame();
 void gameOver();
 void moveHead(Snake* snake, int dir);
 void moveTail(Snake* snake, int mx, int my);
-void freeCorners();
+void freeCorners(Snake* snake);
 void printDebug(Snake* snake, int mx, int my);
 
 #endif

@@ -77,7 +77,7 @@ void collect() {
 }
 
 void gameOver() {
-    freeCorners();
+    freeCorners(&snake);
     nodelay(stdscr, false); 
 
     WINDOW *win = newwin(11,20,((my-4)/2)-5,((mx-4)/2)-5);
@@ -250,7 +250,7 @@ void moveTail(Snake* snake, int mx, int my) {
 
     mvaddch(tail->y, tail->x, ' ');
 
-    Position bottom = *bottomPos();
+    Position bottom = *bottomPos(snake);
     
     if (tail->x == bottom.x && tail->y == bottom.y) {
         tail->dir = bottom.dir;
