@@ -1,86 +1,83 @@
 #include "game.h"
 
-int ticks;
-int lastHit;
-int mx, my;
-
-Snake snake;
-
 int main() {
     initscr();
     curs_set(0);
     refresh();
-    getmaxyx(stdscr,my,mx);
+
+    Game game;
+    getmaxyx(stdscr,game.my,game.mx);
 
     keypad(stdscr, TRUE);
     noecho();
 
     srand(time(NULL));
 
-    startGame();
+    startGame(&game);
 
     int key;
 
-    for(ticks = 0;;ticks++) {
-        moveHead(&snake, snake.head->dir);
-        if(ticks>5 && (ticks > lastHit+3)) moveTail(&snake, mx, my);
+    for(game.ticks = 0;;game.ticks++) {
+        moveHead(&game, game.snake->head->dir);
+        if(game.ticks>5 && (game.ticks > game.lastHit+3)) 
+            moveTail(&game);
 
         refresh();
         usleep(150000); 
 
-        mvprintw(my-2,mx/2, "ticks: %i lastHit: %i   ",ticks, lastHit);
-        printDebug(&snake, mx, my);
+        mvprintw(game.my-2,game.mx/2, "ticks: %i lastHit: %i   ",game.ticks, game.lastHit);
+        printDebug(game.snake, game.mx, game.my);
         
         key = getch();
-        if (key != ERR) snake.head->dir = key;
+        if (key != ERR) game.snake->head->dir = key;
     }
 }
 
-void startGame(){
+void startGame(Game* game){
     nodelay(stdscr, TRUE); 
 
     // draw border
     move(0,0);
-    hline('-', mx-1);
-    vline('|',my-4);
+    hline('-', game->mx-1);
+    vline('|',game->my-4);
     addch(A_ALTCHARSET | ACS_ULCORNER);
-    move(my-4,0);
-    hline('-', mx-1);
+    move(game->my-4,0);
+    hline('-', game->mx-1);
     addch(A_ALTCHARSET | ACS_LLCORNER);
-    move(0,mx-1);
-    vline('|',my-4);
+    move(0,game->mx-1);
+    vline('|',game->my-4);
     addch(A_ALTCHARSET | ACS_URCORNER);
-    mvaddch(my-4, mx-1,A_ALTCHARSET | ACS_LRCORNER);
+    mvaddch(game->my-4, game->mx-1,A_ALTCHARSET | ACS_LRCORNER);
 
-    initSnake(&snake, my);
-    lastHit = 0;
-    ticks = 0;
-    mvaddch(my/2,mx/2,'*');
+    game->snake = initSnake(game->my);
+    game->lastHit = 0;
+    game->ticks = 0;
+    mvaddch(game->my/2,game->mx/2,'*');
 }
 
-void collect() {
-    if (lastHit > ticks - 3) {
-        lastHit = lastHit + 3;
+void collect(Game* game) {
+    if (game->lastHit > game->ticks - 3) {
+        game->lastHit = game->lastHit + 3;
     } else {
-        lastHit = ticks;
+        game->lastHit = game->ticks;
     }
 
     int x, y;
     char character;
     do {
-        x = rand() % (mx-2);
-        y = rand() % (my-4);
+        x = rand() % (game->mx-2);
+        y = rand() % (game->my-4);
         character = mvinch(y+1,x+1) & A_CHARTEXT;
     } while (!isspace(character));
-    mvprintw(my-1,mx/2,"mx: %i my: %i food: (%i,%i)     ",mx,my,x+1,y+1);
+    mvprintw(game->my-1,game->mx/2,"mx: %i my: %i food: (%i,%i)     ",game->mx,game->my,x+1,y+1);
     mvaddch(y+1,x+1, '*');
 }
 
-void gameOver() {
-    freeCorners(&snake);
+void gameOver(Game* game) {
+    freeCorners(game->snake);
     nodelay(stdscr, false); 
 
-    WINDOW *win = newwin(11,20,((my-4)/2)-5,((mx-4)/2)-5);
+    WINDOW *win = newwin(11,20,((game->my-4)/2)-5,((game->mx-4)/2)-5);
 
     deletePods();
 
@@ -97,7 +94,7 @@ void gameOver() {
         if (selection == 'y') {
             clear();
             refresh();
-            startGame();
+            startGame(game);
         } else if (selection == 'n') {
             clear();
             refresh();
@@ -107,23 +104,24 @@ void gameOver() {
     } while (selection != 'y' && selection != 'n');
 }
 
-bool check() {
-    Position* head = snake.head;
-    printDir(head->dir,"dir", my-3, mx/2);
-    printDir(head->prev,"prev", my-3, (mx/2)+12);
+bool check(Game* game) {
+    Position* head = game->snake->head;
+    printDir(head->dir,"dir", game->my-3, game->mx/2);
+    printDir(head->prev,"prev", game->my-3, (game->mx/2)+12);
     char current = mvinch(head->y, head->x) & A_CHARTEXT;
     if ((current) == '*'){
-        collect();
+        collect(game);
         createPod();
     } else if (!isspace(current)){
-        gameOver();
+        gameOver(game);
         return false; // unreachable
     } 
 
     return true;
 }
 
-void moveRight(Snake* snake){
+void moveRight(Game* game){
+    Snake* snake = game->snake;
     Position* head = snake->head;
     if (head->prev == KEY_UP) {
         mvaddch(head->y, head->x, A_ALTCHARSET | ACS_ULCORNER);
@@ -135,13 +133,14 @@ void moveRight(Snake* snake){
         mvaddch(head->y, head->x,'-');    
     }
     head->x++;
-    if(check()) {
+    if(check(game)) {
         mvaddch(head->y, head->x,'>');
         head->prev = KEY_RIGHT;
     }
 }
 
-void moveLeft(Snake* snake) {
+void moveLeft(Game* game) {
+    Snake* snake = game->snake;
     Position* head = snake->head;
     if (head->prev == KEY_UP) {
         mvaddch(head->y, head->x,A_ALTCHARSET | ACS_URCORNER);
@@ -153,13 +152,14 @@ void moveLeft(Snake* snake) {
         mvaddch(head->y, head->x, '-');
     }
     head->x--;
-    if (check()) {
+    if (check(game)) {
         mvaddch(head->y,head->x,'<');
         head->prev = KEY_LEFT;
     }
 }
 
-void moveUp(Snake* snake) {
+void moveUp(Game* game) {
+    Snake* snake = game->snake;
     Position* head = snake->head;
     if (head->prev == KEY_LEFT) {
         mvaddch(head->y, head->x,A_ALTCHARSET | ACS_LLCORNER);
@@ -171,13 +171,14 @@ void moveUp(Snake* snake) {
         mvaddch(head->y, head->x, '|');
     }
     head->y--;
-    if (check()) {
+    if (check(game)) {
         mvaddch(head->y, head->x, '^');
         head->prev = KEY_UP;
     }
 }
 
-void moveDown(Snake* snake) {
+void moveDown(Game* game) {
+    Snake* snake = game->snake;
     Position* head = snake->head;
     if (head->prev == KEY_LEFT) {
         mvaddch(head->y, head->x,A_ALTCHARSET | ACS_ULCORNER);
@@ -189,13 +190,14 @@ void moveDown(Snake* snake) {
         mvaddch(head->y, head->x, '|');
     }
     head->y++;
-    if (check()) {
+    if (check(game)) {
         mvaddch(head->y,head->x,'v');
         head->prev = KEY_DOWN;
     }
 }
 
-void moveHead(Snake* snake, int dir) {
+void moveHead(Game* game, int dir) {
+    Snake* snake = game->snake;
     Position* head = snake->head;
     switch(dir) {
         case 'd':
@@ -203,9 +205,9 @@ void moveHead(Snake* snake, int dir) {
             head->dir=KEY_RIGHT;
         case KEY_RIGHT: // east
             if(head->prev == KEY_LEFT) {
-                moveLeft(snake);
+                moveLeft(game);
             } else {
-                moveRight(snake);
+                moveRight(game);
             }
             break;
         case 'w':
@@ -213,9 +215,9 @@ void moveHead(Snake* snake, int dir) {
             head->dir=KEY_UP;
         case KEY_UP: // north
             if(head->prev == KEY_DOWN) {
-                moveDown(snake);
+                moveDown(game);
             } else {
-                moveUp(snake);
+                moveUp(game);
             }
             break;
         case 'a':
@@ -223,9 +225,9 @@ void moveHead(Snake* snake, int dir) {
             head->dir=KEY_LEFT;
         case KEY_LEFT: // west
             if(head->prev == KEY_RIGHT) {
-                moveRight(snake);
+                moveRight(game);
             } else {
-                moveLeft(snake);
+                moveLeft(game);
             }
             break;
         case 's':
@@ -233,33 +235,33 @@ void moveHead(Snake* snake, int dir) {
             head->dir=KEY_DOWN;
         case KEY_DOWN: // south
             if(head->prev == KEY_UP) {
-                moveUp(snake);
+                moveUp(game);
             } else {
-                moveDown(snake);
+                moveDown(game);
             }
             break;
         default:
-            moveHead(snake, snake->head->prev);
+            moveHead(game, snake->head->prev);
             break;
     }
 }
 
-void moveTail(Snake* snake, int mx, int my) {
+void moveTail(Game* game) {
+    Snake* snake = game->snake;
     Position* tail = snake->tail;
     Position* head = snake->head;
+    Position* bottom = snake->bottom->position;
 
     mvaddch(tail->y, tail->x, ' ');
 
-    Position bottom = *bottomPos(snake);
-    
-    if (tail->x == bottom.x && tail->y == bottom.y) {
-        tail->dir = bottom.dir;
-        popCorner();
+    if (tail->x == bottom->x && tail->y == bottom->y) {
+        tail->dir = bottom->dir;
+        popCorner(snake);
     } 
 
     switch(tail->dir) {
         case KEY_RIGHT:
-            if(head->x < mx) tail->x++;
+            if(head->x < game->mx) tail->x++;
             break;
         case KEY_UP:
             if(head->y > 0) tail->y--;
@@ -268,7 +270,7 @@ void moveTail(Snake* snake, int mx, int my) {
             if(head->x > 0) tail->x--;
             break;
         case KEY_DOWN:
-            if(head->y < my) tail->y++;
+            if(head->y < game->my) tail->y++;
             break;
     }
 }

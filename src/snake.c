@@ -1,6 +1,7 @@
 #include "snake.h"
 
-void initSnake(Snake* snake, int my) {
+Snake* initSnake(int my) {
+    Snake* snake = malloc(sizeof(Snake));
     Position* head = initPosition();
     Position* tail = initPosition();
     snake->top = snake->bottom = initCorner(0,head->y,KEY_RIGHT);
@@ -12,10 +13,8 @@ void initSnake(Snake* snake, int my) {
 
     snake->head = head;
     snake->tail = tail;
-}
 
-Position* bottomPos(Snake* snake) {
-    return snake->bottom->position;
+    return snake;
 }
 
 void freeCorner(Snake* snake) {
