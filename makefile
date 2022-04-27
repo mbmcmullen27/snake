@@ -1,5 +1,7 @@
-snake: dist/snake.o dist/position.o dist/game.o dist/pyClient.o
-	clang -lncurses dist/snake.o dist/position.o dist/game.o dist/pyClient.o $(shell python3-config --cflags --embed --ldflags) -o snake
+snake: dist/main.o dist/snake.o dist/position.o dist/game.o dist/pyClient.o
+	clang -lncurses dist/main.o dist/snake.o dist/position.o dist/game.o dist/pyClient.o $(shell python3-config --cflags --embed --ldflags) -o snake
+dist/main.o: src/main.c src/main.h src/game.h
+	clang $(shell python3-config --cflags --embed) -c src/main.c -o dist/main.o
 dist/snake.o: src/snake.c src/snake.h src/position.h
 	clang -c src/snake.c -o dist/snake.o
 dist/position.o: src/position.c src/position.h

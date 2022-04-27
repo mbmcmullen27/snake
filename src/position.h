@@ -18,8 +18,6 @@ typedef struct Corner{
 
 Position* initPosition();
 Corner* initCorner(int x, int y, int dir);
-void pushCorner();
-void popCorner();
 void printPos(char* name, Position* pos, int y, int x); 
 
 #endif
