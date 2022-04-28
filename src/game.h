@@ -11,18 +11,20 @@ typedef struct {
     int lastHit;
     int mx;
     int my;
+    bool kubeEnabled;
     Snake* snake;
 } Game;
 
 void collect();
-bool check(Game* game);
-void startGame(Game* game);
-void gameOver(Game* game);
-void moveHead(Game* game, int dir);
-void moveTail(Game* game);
-void moveUp(Game* game);
-void moveDown(Game* game);
-void moveLeft(Game* game);
-void moveRight(Game* game);
+bool check(Game*);
+void startGame(Game*);
+void gameOver(Game*);
+void moveHead(Game*, int dir);
+void moveTail(Game*);
+void moveUp(Game*);
+void moveDown(Game*);
+void moveLeft(Game*);
+void moveRight(Game*);
+void printDebug(Game*);
 
 #endif

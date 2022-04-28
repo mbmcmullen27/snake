@@ -21,7 +21,6 @@ void freeCorner(Snake*);
 void freeCorners(Snake*);
 void pushCorner(Snake*);
 void popCorner(Snake*);
-void printDebug(Snake*, int mx, int my);
 void printDir(int, char*, int, int);
 void printPos(char*, Position*, int, int);
 

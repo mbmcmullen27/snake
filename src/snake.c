@@ -69,9 +69,3 @@ void printPos(char* name, Position* pos, int y, int x) {
     mvprintw(y,x,"%s: (%i, %i)    ", name, pos->x, pos->y);
     printDir(pos->dir,"dir",y, x+18);
 }
-
-void printDebug(Snake* snake, int mx, int my) {
-    printPos("top", snake->top->position, my-3, 0);
-    printPos("bottom", snake->bottom->position, my-2, 0);
-    printPos("tail", snake->tail, my-1, 0);
-}

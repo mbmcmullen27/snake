@@ -46,7 +46,7 @@ void gameOver(Game* game) {
 
     WINDOW *win = newwin(11,20,((game->my-4)/2)-5,((game->mx-4)/2)-5);
 
-    deletePods();
+    if(game->kubeEnabled) deletePods();
 
     box(win, '|', '=');
     mvwprintw(win, 3,5, "GAME OVER");
@@ -78,7 +78,7 @@ bool check(Game* game) {
     char current = mvinch(head->y, head->x) & A_CHARTEXT;
     if ((current) == '*'){
         collect(game);
-        createPod();
+        if(game->kubeEnabled) createPod();
     } else if (!isspace(current)){
         gameOver(game);
         return false; // unreachable
@@ -240,4 +240,12 @@ void moveTail(Game* game) {
             if(head->y < game->my) tail->y++;
             break;
     }
+}
+
+void printDebug(Game* game) {
+    Snake* snake = game->snake;
+    printPos("top", snake->top->position, game->my-3, 0);
+    printPos("bottom", snake->bottom->position, game->my-2, 0);
+    printPos("tail", snake->tail, game->my-1, 0);
+    mvprintw(game->my-1,game->mx/2,"kube enabled: %i", game->kubeEnabled);
 }
