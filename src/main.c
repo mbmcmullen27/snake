@@ -13,6 +13,7 @@ int main() {
 
     srand(time(NULL));
 
+    mainMenu(&game);
     startGame(&game);
 
     int key;
@@ -31,4 +32,33 @@ int main() {
         key = getch();
         if (key != ERR) game.snake->head->dir = key;
     }
+}
+
+void mainMenu(Game* game) {
+    nodelay(stdscr, false); 
+    WINDOW *win = newwin(13,60,((game->my-4)/2)-5,((game->mx-4)/2)-25);
+
+    box(win, '|', '=');
+    mvwprintw(win, 3,22, "!!! WARNING !!!");
+    mvwprintw(win, 5,10, "This game reads your local ~/.kube/config");
+    mvwprintw(win, 6,8, "and deploys things to the selected cluster...");
+    mvwprintw(win, 8,18, "Do you want to continue?");
+    mvwprintw(win, 10,29, "Y/N");
+    touchwin(win);
+    wrefresh(win);
+
+    int selection;
+    do {
+        selection = getch();
+        if (selection == 'y') {
+            clear();
+            refresh();
+        } else if (selection == 'n') {
+            clear();
+            refresh();
+            endwin();
+            exit(0);
+        }
+    } while (selection != 'y' && selection != 'n');
+
 }

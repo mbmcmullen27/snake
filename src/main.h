@@ -4,4 +4,6 @@
 #include "game.h"
 #include <curses.h>
 
+void mainMenu();
+
 #endif
