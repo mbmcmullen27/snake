@@ -6,6 +6,11 @@ int main() {
     refresh();
 
     Game game;
+#ifdef DEBUG
+    game.yoffset = 4;
+#else
+    game.yoffset = 1;
+#endif
     game.kubeEnabled = false;
     getmaxyx(stdscr,game.my,game.mx);
 
@@ -27,7 +32,6 @@ int main() {
         refresh();
         usleep(150000); 
 
-        mvprintw(game.my-2,game.mx/2, "ticks: %i lastHit: %i   ",game.ticks, game.lastHit);
         printDebug(&game);
         
         key = getch();
@@ -37,16 +41,33 @@ int main() {
 
 void mainMenu(Game* game) {
     nodelay(stdscr, false); 
-    WINDOW *win = newwin(13,60,((game->my-4)/2)-5,((game->mx-4)/2)-25);
+    if (game->my > 13 && game->mx > 70) {
+        int ypos = ((game->my - 4) / 2) - 5;
+        int xpos = ((game->mx - 4) / 2) - 25;
 
-    box(win, '|', '=');
-    mvwprintw(win, 3,22, "!!! WARNING !!!");
-    mvwprintw(win, 5,10, "This game reads your local ~/.kube/config");
-    mvwprintw(win, 6,8, "and deploys things to the selected cluster...");
-    mvwprintw(win, 8,9, "Do you want to continue with this enabled?");
-    mvwprintw(win, 10,29, "Y/N/Q");
-    touchwin(win);
-    wrefresh(win);
+        WINDOW *win = newwin(13,60,ypos,xpos);
+
+        box(win, '|', '=');
+        mvwprintw(win, 3,22, "!!! WARNING !!!");
+        mvwprintw(win, 5,10, "This game reads your local ~/.kube/config");
+        mvwprintw(win, 6,8, "and deploys things to the selected cluster...");
+        mvwprintw(win, 8,9, "Do you want to continue with this enabled?");
+        mvwprintw(win, 10,29, "Y/N/Q");
+
+        touchwin(win);
+        wrefresh(win);
+    } else {
+        WINDOW *win = newwin(5,50,0,0);
+
+        mvwprintw(win, 0,0, "!!! WARNING !!!");
+        mvwprintw(win, 1,0, "This game reads your local ~/.kube/config");
+        mvwprintw(win, 2,0, "and deploys things to the selected cluster...");
+        mvwprintw(win, 3,0, "Do you want to continue with this enabled?");
+        mvwprintw(win, 4,0, "Y/N/Q");
+
+        touchwin(win);
+        wrefresh(win);
+    }
 
     int selection;
     do {
@@ -65,5 +86,8 @@ void mainMenu(Game* game) {
             endwin();
             exit(0);
         }
+#ifdef DEBUG
+        mvprintw(game->my-1,game->mx/2,"kube enabled: %i", game->kubeEnabled);
+#endif
     } while (selection != 'y' && selection != 'n');
 }

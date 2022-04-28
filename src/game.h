@@ -11,6 +11,7 @@ typedef struct {
     int lastHit;
     int mx;
     int my;
+    int yoffset;
     bool kubeEnabled;
     Snake* snake;
 } Game;

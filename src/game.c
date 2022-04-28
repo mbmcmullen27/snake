@@ -4,17 +4,20 @@ void startGame(Game* game){
     nodelay(stdscr, TRUE); 
 
     // draw border
+    int height = game->my - game->yoffset;
+    int width = game->mx - 1;
+
     move(0,0);
-    hline('-', game->mx-1);
-    vline('|',game->my-4);
+    hline('-', width);
+    vline('|',height);
     addch(A_ALTCHARSET | ACS_ULCORNER);
-    move(game->my-4,0);
-    hline('-', game->mx-1);
+    move(height,0);
+    hline('-', width);
     addch(A_ALTCHARSET | ACS_LLCORNER);
-    move(0,game->mx-1);
-    vline('|',game->my-4);
+    move(0,width);
+    vline('|',height);
     addch(A_ALTCHARSET | ACS_URCORNER);
-    mvaddch(game->my-4, game->mx-1,A_ALTCHARSET | ACS_LRCORNER);
+    mvaddch(height, width, A_ALTCHARSET | ACS_LRCORNER);
 
     game->snake = initSnake(game->my);
     game->lastHit = 0;
@@ -33,10 +36,12 @@ void collect(Game* game) {
     char character;
     do {
         x = rand() % (game->mx-2);
-        y = rand() % (game->my-4);
+        y = rand() % (game->my - game->yoffset);
         character = mvinch(y+1,x+1) & A_CHARTEXT;
     } while (!isspace(character));
+#ifdef DEBUG
     mvprintw(game->my-1,game->mx/2,"mx: %i my: %i food: (%i,%i)     ",game->mx,game->my,x+1,y+1);
+#endif
     mvaddch(y+1,x+1, '*');
 }
 
@@ -44,7 +49,10 @@ void gameOver(Game* game) {
     freeCorners(game->snake);
     nodelay(stdscr, false); 
 
-    WINDOW *win = newwin(11,20,((game->my-4)/2)-5,((game->mx-4)/2)-5);
+    int ypos = ((game->my - game->yoffset) / 2) - 5;
+    int xpos = ((game->mx - 4) / 2) - 5;
+
+    WINDOW *win = newwin(11,20,ypos,xpos);
 
     if(game->kubeEnabled) deletePods();
 
@@ -243,9 +251,11 @@ void moveTail(Game* game) {
 }
 
 void printDebug(Game* game) {
+#ifdef DEBUG
     Snake* snake = game->snake;
     printPos("top", snake->top->position, game->my-3, 0);
     printPos("bottom", snake->bottom->position, game->my-2, 0);
     printPos("tail", snake->tail, game->my-1, 0);
-    mvprintw(game->my-1,game->mx/2,"kube enabled: %i", game->kubeEnabled);
+    mvprintw(game->my-2,game->mx/2, "ticks: %i lastHit: %i   ",game->ticks, game->lastHit);
+#endif
 }

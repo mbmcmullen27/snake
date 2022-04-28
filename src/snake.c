@@ -46,6 +46,7 @@ void popCorner(Snake* snake) {
 }
 
 void printDir(int dir, char* id, int y, int x) {
+#ifdef DEBUG
     switch(dir) {
         case KEY_RIGHT:
             mvprintw(y, x, "%s: RIGHT   ",id);
@@ -63,6 +64,7 @@ void printDir(int dir, char* id, int y, int x) {
             mvprintw(y, x, "%s: %i",id, dir);
             break;
     }
+#endif
 }
 
 void printPos(char* name, Position* pos, int y, int x) {
