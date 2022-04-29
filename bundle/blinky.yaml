@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: blinky
+spec:
+  containers:
+  - name: blinky
+    image: mcmull27/blinky:arm

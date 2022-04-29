@@ -1,8 +1,21 @@
 #include "position.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <dirent.h> 
+#include <ctype.h>
+#include <stdlib.h>
+#include <string.h>
+#include "manifest.h"
 
-int main(){
+int main() {
+    Manifest* list = readDirectory("bundle");
+    for(int i = 0; list != NULL; list = list->next) {
+        printf("%i-%s\n",i,list->name);
+        i++;
+    }
+}
+
+int positionTest(){
     Position** list = malloc(sizeof(Position) * 8);
     int i;
     for(i=0;i<8;i++){
@@ -37,8 +50,4 @@ Position* initPosition() {
     res->dir=0;
     res->prev=0;
     return res;
-}
-
-void resize(Position** list) {
-
 }

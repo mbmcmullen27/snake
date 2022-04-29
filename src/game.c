@@ -3,10 +3,10 @@
 void startGame(Game* game){
     nodelay(stdscr, TRUE); 
 
-    // draw border
     int height = game->my - game->yoffset;
     int width = game->mx - 1;
 
+    // draw border
     move(0,0);
     hline('-', width);
     vline('|',height);

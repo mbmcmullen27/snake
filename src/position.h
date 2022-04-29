@@ -1,6 +1,8 @@
 #ifndef position_h
 #define position_h
 
+#include <stdbool.h>
+
 typedef struct {
     int x;
     int y;
