@@ -72,19 +72,23 @@ void mainMenu(Game* game) {
     int selection;
     do {
         selection = getch();
-        if (selection == 'y') {
-            game->kubeEnabled=true;
-            clear();
-            refresh();
-        } else if (selection == 'n') {
-            game->kubeEnabled=false;
-            clear();
-            refresh();
-        } else if (selection == 'q') {
-            clear();
-            refresh();
-            endwin();
-            exit(0);
+        switch(selection) {
+            case'y' :
+                game->kubeEnabled=true;
+                clear();
+                refresh();
+                break;
+            case 'n' :
+                game->kubeEnabled=false;
+                clear();
+                refresh();
+                break;
+            case 'Q':
+            case 'q':
+                clear();
+                refresh();
+                endwin();
+                exit(0);
         }
 #ifdef DEBUG
         mvprintw(game->my-1,game->mx/2,"kube enabled: %i", game->kubeEnabled);

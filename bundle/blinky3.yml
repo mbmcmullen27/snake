@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: blinky
+  name: blonky-c
 spec:
   containers:
   - name: blinky
