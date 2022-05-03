@@ -61,10 +61,13 @@ void collect(Game* game) {
         character = mvinch(y+1,x+1) & A_CHARTEXT;
     } while (!isspace(character));
 
+    char* nextFile = nextManifest(game);
+    if(strcmp(nextFile, "NONE")) applyManifest(nextFile);
+
 #ifdef DEBUG
     drawBorder(game);
     mvprintw(game->my-1,game->mx/2,"mx: %i my: %i food: (%i,%i)     ",game->mx,game->my,x+1,y+1);
-    mvprintw(0,2," deploying target: %s ", nextManifest(game));
+    mvprintw(0,2," deploying target: %s ", nextFile);
 #endif
 
     mvaddch(y+1,x+1, '*');
