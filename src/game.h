@@ -5,6 +5,7 @@
 
 #include "pyClient.h"
 #include "snake.h"
+#include <dirent.h> 
 
 typedef struct {
     int ticks;
@@ -13,6 +14,7 @@ typedef struct {
     int my;
     int yoffset;
     bool kubeEnabled;
+    DIR* dir;
     Snake* snake;
 } Game;
 
@@ -27,5 +29,6 @@ void moveDown(Game*);
 void moveLeft(Game*);
 void moveRight(Game*);
 void printDebug(Game*);
+void drawBorder(Game*);
 
 #endif

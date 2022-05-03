@@ -5,7 +5,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../src/manifest.h"
+#include "manifest.h"
 
 int main() {
     Manifest* list = readDirectory("bundle");

@@ -3,10 +3,20 @@
 void startGame(Game* game){
     nodelay(stdscr, TRUE); 
 
+    drawBorder(game);
+
+    game->dir = opendir("bundle");
+
+    game->snake = initSnake(game->my);
+    game->lastHit = 0;
+    game->ticks = 0;
+    mvaddch(game->my/2,game->mx/2,'*');
+}
+
+void drawBorder(Game* game) {
     int height = game->my - game->yoffset;
     int width = game->mx - 1;
 
-    // draw border
     move(0,0);
     hline('-', width);
     vline('|',height);
@@ -18,11 +28,22 @@ void startGame(Game* game){
     vline('|',height);
     addch(A_ALTCHARSET | ACS_URCORNER);
     mvaddch(height, width, A_ALTCHARSET | ACS_LRCORNER);
+}
 
-    game->snake = initSnake(game->my);
-    game->lastHit = 0;
-    game->ticks = 0;
-    mvaddch(game->my/2,game->mx/2,'*');
+char* nextManifest(Game* game) {
+    if (game->dir) {
+        struct dirent *dir;
+        if ((dir = readdir(game->dir)) != NULL ) {
+            char* name = dir->d_name;
+            int len = strlen(name);
+            if(!strcmp(&name[len-3],"yml") || !strcmp(&name[len-4],"yaml")){
+                return name;
+            } else {
+                return nextManifest(game);
+            }
+        }
+    }
+    return "NONE";
 }
 
 void collect(Game* game) {
@@ -39,9 +60,13 @@ void collect(Game* game) {
         y = rand() % (game->my - game->yoffset);
         character = mvinch(y+1,x+1) & A_CHARTEXT;
     } while (!isspace(character));
+
 #ifdef DEBUG
+    drawBorder(game);
     mvprintw(game->my-1,game->mx/2,"mx: %i my: %i food: (%i,%i)     ",game->mx,game->my,x+1,y+1);
+    mvprintw(0,2," deploying target: %s ", nextManifest(game));
 #endif
+
     mvaddch(y+1,x+1, '*');
 }
 
