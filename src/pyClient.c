@@ -40,7 +40,6 @@ void deletePods() {
 
 void applyManifest(char* filename) {
     if (fork() == 0) {
-        wchar_t* argv[1];
         PyClient client;
         char* script = "applyFile";
         char* extension = ".py";

@@ -73,17 +73,22 @@ void mainMenu(Game* game) {
     do {
         selection = getch();
         switch(selection) {
+            case'Y' :
+                selection = 'y';
             case'y' :
                 game->kubeEnabled=true;
                 clear();
                 refresh();
                 break;
+            case 'N' :
+                selection = 'n';
             case 'n' :
                 game->kubeEnabled=false;
                 clear();
                 refresh();
                 break;
             case 'Q':
+                selection = 'q';
             case 'q':
                 clear();
                 refresh();

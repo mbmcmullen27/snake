@@ -1,6 +1,3 @@
-#include <stdlib.h>
-#include <curses.h>
-
 #include "position.h"
 
 Position* initPosition() {
