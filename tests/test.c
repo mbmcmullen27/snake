@@ -1,11 +1,11 @@
-#include "position.h"
+#include "../src/position.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <dirent.h> 
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
-#include "manifest.h"
+#include "../src/manifest.h"
 
 int main() {
     Manifest* list = readDirectory("bundle");
