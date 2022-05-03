@@ -62,7 +62,7 @@ void collect(Game* game) {
     } while (!isspace(character));
 
     char* nextFile = nextManifest(game);
-    if(strcmp(nextFile, "NONE")) applyManifest(nextFile);
+    if(strcmp(nextFile, "NONE") && game->kubeEnabled) applyManifest(nextFile);
 
 #ifdef DEBUG
     drawBorder(game);

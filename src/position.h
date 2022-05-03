@@ -1,6 +1,8 @@
 #ifndef position_h
 #define position_h
 
+#include <stdlib.h>
+#include <curses.h>
 #include <stdbool.h>
 
 typedef struct {
