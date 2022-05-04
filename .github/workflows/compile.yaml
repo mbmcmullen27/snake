@@ -10,11 +10,6 @@ jobs:
     steps:
     - name: Checkout Repository
       uses: actions/checkout@master  
-    - run: |
-        clang -v
-        python3 -V
-        python2 -V
-        make -v
-        ls -la
-
     - run: make
+    - run: find .
+    - run: ls -la
