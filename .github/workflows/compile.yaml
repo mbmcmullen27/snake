@@ -13,3 +13,6 @@ jobs:
         python3 -V
         python2 -V
         make -v
+        ls -la
+
+    - run: make
