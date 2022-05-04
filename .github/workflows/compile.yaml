@@ -4,9 +4,6 @@ on:
     branches:
       - release
 jobs:
-  permissions:
-    contents: write
-    packages: write
   compile:
     runs-on: ubuntu-latest
     name: Make Executable
