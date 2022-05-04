@@ -10,6 +10,7 @@
 typedef struct {
     int ticks;
     int lastHit;
+    int score;
     int mx;
     int my;
     int yoffset;

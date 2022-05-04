@@ -3,13 +3,16 @@
 void startGame(Game* game){
     nodelay(stdscr, TRUE); 
 
+    game->score = 0;
+    game->lastHit = 0;
+    game->ticks = 0;
+
     drawBorder(game);
 
     game->dir = opendir("bundle");
-
     game->snake = initSnake(game->my);
-    game->lastHit = 0;
-    game->ticks = 0;
+
+
     mvaddch(game->my/2,game->mx/2,'*');
 }
 
@@ -28,6 +31,8 @@ void drawBorder(Game* game) {
     vline('|',height);
     addch(A_ALTCHARSET | ACS_URCORNER);
     mvaddch(height, width, A_ALTCHARSET | ACS_LRCORNER);
+    mvprintw(0,2,"%i",game->score);
+
 }
 
 char* nextManifest(Game* game) {
@@ -61,13 +66,16 @@ void collect(Game* game) {
         character = mvinch(y+1,x+1) & A_CHARTEXT;
     } while (!isspace(character));
 
+    drawBorder(game);
+
     char* nextFile = nextManifest(game);
-    if(strcmp(nextFile, "NONE") && game->kubeEnabled) applyManifest(nextFile);
+    if(strcmp(nextFile, "NONE") && game->kubeEnabled){
+        applyManifest(nextFile);
+        mvprintw(0,8," deploying target: %s ", nextFile);
+    }     
 
 #ifdef DEBUG
-    drawBorder(game);
     mvprintw(game->my-1,game->mx/2,"mx: %i my: %i food: (%i,%i)     ",game->mx,game->my,x+1,y+1);
-    mvprintw(0,2," deploying target: %s ", nextFile);
 #endif
 
     mvaddch(y+1,x+1, '*');
@@ -84,10 +92,15 @@ void gameOver(Game* game) {
 
     if(game->kubeEnabled) deletePods();
 
+    char* scoreLine = "Final Score: ";
+    char buf[15];
+    snprintf( buf, 15, "%s%d", scoreLine, game->score );
+
     box(win, '|', '=');
-    mvwprintw(win, 3,5, "GAME OVER");
-    mvwprintw(win, 5,4, "Play again?");
-    mvwprintw(win, 7,8, "Y/N");
+    mvwprintw(win, 2,5, "GAME OVER");
+    mvwprintw(win, 4,3, buf);
+    mvwprintw(win, 6,4, "Play again?");
+    mvwprintw(win, 8,8, "Y/N");
     touchwin(win);
     wrefresh(win);
 
@@ -113,6 +126,7 @@ bool check(Game* game) {
     printDir(head->prev,"prev", game->my-3, (game->mx/2)+12);
     char current = mvinch(head->y, head->x) & A_CHARTEXT;
     if ((current) == '*'){
+        game->score = game->score +1;
         collect(game);
         if(game->kubeEnabled) createPod();
     } else if (!isspace(current)){
