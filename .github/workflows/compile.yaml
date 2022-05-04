@@ -11,10 +11,6 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@master  
 
-    - run: |
-        sudo apt update && sudo apt upgrade
-        sudo apt install libncurses6
-
     - name: Make 
       run: make
 
