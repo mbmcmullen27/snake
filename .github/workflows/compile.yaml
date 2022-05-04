@@ -8,6 +8,8 @@ jobs:
     runs-on: ubuntu-latest
     name: Make Executable
     steps:
+    - name: Checkout Repository
+        uses: actions/checkout@master  
     - run: |
         clang -v
         python3 -V
