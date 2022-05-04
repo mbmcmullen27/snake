@@ -4,12 +4,24 @@ on:
     branches:
       - release
 jobs:
+  permissions:
+    contents: write
+    packages: write
   compile:
     runs-on: ubuntu-latest
     name: Make Executable
     steps:
     - name: Checkout Repository
       uses: actions/checkout@master  
-    - run: make
-    - run: find .
+    - name: Make 
+      run: make
+
     - run: ls -la
+
+    - name: Compress 
+      run: tar -zcvf snake.tar.gz snake
+    
+    - uses: actions/upload-artifact@v3
+      with:
+        name: snake
+        path: snake.tar.gz
