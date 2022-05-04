@@ -9,6 +9,7 @@ jobs:
     name: Make Executable
     steps:
     - run: |
-      clang -v
-      python3 -V
-      python2 -V
+        clang -v
+        python3 -V
+        python2 -V
+        make -v
