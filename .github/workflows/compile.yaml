@@ -9,7 +9,7 @@ jobs:
     name: Make Executable
     steps:
     - name: Checkout Repository
-        uses: actions/checkout@master  
+      uses: actions/checkout@master  
     - run: |
         clang -v
         python3 -V
