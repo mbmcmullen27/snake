@@ -8,7 +8,19 @@ jobs:
     runs-on: ubuntu-latest
     name: Make Executable
     steps:
+    - name: Checkout Repository
+      uses: actions/checkout@master  
+
     - run: |
-      clang -v
-      python3 -V
-      python2 -V
+        sudo apt update && sudo apt upgrade
+        sudo apt install libncurses6
+
+    - name: Make 
+      run: make
+
+    - run: ls -la
+    
+    - uses: actions/upload-artifact@v3
+      with:
+        name: snake
+        path: snake
