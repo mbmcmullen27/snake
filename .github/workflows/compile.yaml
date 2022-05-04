@@ -19,11 +19,8 @@ jobs:
       run: make
 
     - run: ls -la
-
-    - name: Compress 
-      run: tar -zcvf snake.tar.gz snake
     
     - uses: actions/upload-artifact@v3
       with:
         name: snake
-        path: snake.tar.gz
+        path: snake
