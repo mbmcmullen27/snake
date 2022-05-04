@@ -10,6 +10,11 @@ jobs:
     steps:
     - name: Checkout Repository
       uses: actions/checkout@master  
+
+    - run: |
+        apt update && apt upgrade
+        apt install libncurses6
+
     - name: Make 
       run: make
 
