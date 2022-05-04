@@ -128,7 +128,7 @@ bool check(Game* game) {
     if ((current) == '*'){
         game->score = game->score +1;
         collect(game);
-        if(game->kubeEnabled) createPod();
+        // if(game->kubeEnabled) createPod();
     } else if (!isspace(current)){
         gameOver(game);
         return false; // unreachable
