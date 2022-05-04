@@ -12,8 +12,8 @@ jobs:
       uses: actions/checkout@master  
 
     - run: |
-        apt update && apt upgrade
-        apt install libncurses6
+        sudo apt update && sudo apt upgrade
+        sudo apt install libncurses6
 
     - name: Make 
       run: make
