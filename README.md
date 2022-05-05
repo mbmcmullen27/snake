@@ -12,7 +12,7 @@ ncurses + kubernetes + snake
 
 ## Play the Game! 
 
-![trailer](./snake-trailer.webm.mov)
+![trailer](./snake-trailer.webm)
 
 ### Docker instructions
 - pull the image:
