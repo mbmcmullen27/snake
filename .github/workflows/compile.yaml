@@ -1,4 +1,4 @@
-name: Compile Source
+name: Build and Push
 on: 
   push:
     branches:
@@ -6,21 +6,26 @@ on:
 jobs:
   compile:
     runs-on: ubuntu-latest
-    name: Make Executable
+    name: Build
     steps:
     - name: Checkout Repository
       uses: actions/checkout@master  
-
-    - run: |
-        sudo apt update && sudo apt upgrade
-        sudo apt install libncurses6
-
-    - name: Make 
-      run: make
-
-    - run: ls -la
-    
-    - uses: actions/upload-artifact@v3
+      
+    - name: Login to DockerHub
+      uses: docker/login-action@v1 
       with:
-        name: snake
-        path: snake
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+    
+    - name: Extract metadata (tags, labels) for Docker
+      id: meta
+      uses: docker/metadata-action@v3
+      with:
+        images: my-docker-hub-namespace/my-docker-hub-repository
+      
+    - name: Build and push
+      id: docker_build
+      uses: docker/build-push-action@v2
+      with:
+        push: true
+        tags: mcmull27/snake:latest
