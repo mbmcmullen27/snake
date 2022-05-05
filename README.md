@@ -14,11 +14,19 @@ ncurses + kubernetes + snake
 4. test: `make test && ./test`
 
 ## Docker instructions
-- for testing make/build:
+- test make/build in a base ubuntu 20 image:
     ```sh
     docker run -it -v $(pwd):/home/snake ubuntu:focal
     ```
-- for playing game:
+- build from source:
     ```sh
-    docker run -it -v $HOME/.kube/config:/home/snake/.kube/config snake 
+    docker build . -t snake
+    ```
+- pull the image:
+    ```sh
+    docker pull mcmull27/snake:latest
+    ```
+- play the game:
+    ```sh
+    docker run -it -e TERM -e COLUMNS="$(tput cols)" -e LINES="$(tput lines)" -v $HOME/.kube/config:/home/snake/.kube/config snake
     ```
