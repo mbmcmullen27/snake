@@ -12,5 +12,4 @@ COPY . /home/snake/
 WORKDIR /home/snake/
 
 RUN make
-
-CMD ["./snake"]
+CMD ["sh","-c","stty size && ./snake"]
