@@ -92,14 +92,14 @@ void gameOver(Game* game) {
 
     if(game->kubeEnabled) deletePods();
 
-    char* scoreLine = "Final Score: ";
+    char* scoreLine = "Final: ";
     char buf[15];
     snprintf( buf, 15, "%s%d", scoreLine, game->score );
 
     box(win, '|', '=');
     mvwprintw(win, 2,5, "GAME OVER");
     mvwprintw(win, 4,3, buf);
-    mvwprintw(win, 6,4, "Play again?");
+    mvwprintw(win, 6,3, "Play again?");
     mvwprintw(win, 8,8, "Y/N");
     touchwin(win);
     wrefresh(win);
