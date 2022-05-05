@@ -5,7 +5,7 @@ ncurses + kubernetes + snake
     - This can be optionally disabled when the game starts
     - The config can also be omitted entirely 
 2. Before playing make sure your current kubectl context is a cluster that you are allowed to make changes to
-    - the kube-snake does not clean up after itself
+    - the only scenario where kube-snake will clean up after itself is if you provide a kubeconfig file and omit a bundle directory (see commands below)
     - the python client doesn't have a mechanism yet for `kubectl delete -f` until this [pr](https://github.com/kubernetes-client/python/pull/1392) gets merged
 3. Before starting the game load kubernetes yaml files into a bundle/ directory
     - yaml files in this directory will be deployed one by one as you collect food for the snake
